@@ -47,7 +47,7 @@
                                         <a href="{{ route('admin.plans.edit', $plan) }}"
                                             class="btn btn-light btn-sm rounded-circle shadow-sm"
                                             style="width: 32px; height: 32px; padding: 0; line-height: 32px;">
-                                            <i class="fa fa-edit text-accent-blue"></i>
+                                            <i class="fa fa-edit text-info"></i>
                                         </a>
                                         <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
                                             onsubmit="return confirm('Delete this plan?')">
