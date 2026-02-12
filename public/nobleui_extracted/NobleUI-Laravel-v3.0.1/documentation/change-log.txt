@@ -1,0 +1,68 @@
+CHANGELOG
+=========
+
+v3.0.1 (30 January 2026)
+- Added forgot-password page
+- Updated outdated npm packages
+- Fixed minor bugs
+
+v3.0.0 (17 May 2025)
+- Updated Laravel to v12
+- Migrated from Laravel Mix to Vite
+- Implemented a light/dark theme toggle
+- Removed jQuery from app.js
+- Replaced Feather Icons with Lucide
+- Replaced unnecessary jQuery usage with vanilla JavaScript
+- Updated all outdated npm packages
+- Fixed various bugs
+- Improved overall design
+- Enhanced RTL layout support
+- Performed additional optimizations and refinements
+
+v2.2.0 (08 February 2023)
+- Updated all outdated npm packages
+- Replaced Bootstrap Datepicker and Tempus Dominus Bootstrap 4 with Flatpickr
+- Replaced Bootstrap Colorpicker with Pickr
+- Replaced SimpleMDE with EasyMDE
+- Removed flag-icon-css package
+- Removed morris.js package
+- Disabled RTL demos by default
+- Fixed minor bugs
+
+v2.1.0 (18 April 2022)
+- Updated Laravel to v9
+- Added SortableJS plugin
+- Updated all outdated npm packages
+- Improved design
+- Fixed minor bugs
+
+v2.0.0 (05 October 2021)
+- Updated Bootstrap to v5
+- Updated all outdated npm packages
+- Improved RTL layout
+- Added RTL support for all demos
+- Fixed bugs
+- Improved design
+
+v1.3.0 (10 January 2021)
+- Updated Laravel to v8
+- Updated Bootstrap to v4.5.3
+- Updated all outdated npm packages
+- Fixed minor bugs
+
+v1.2.0 (28 April 2020)
+- Added Horizontal Menu Dark demo
+
+v1.1.0 (25 April 2020)
+- Updated Laravel to v7
+- Removed laravelcollective/html package
+- Updated Bootstrap to v4.4.1
+- Updated all outdated npm packages
+- Improved design
+- Fixed bugs
+
+v1.0.1 (08 February 2020)
+- Fixed bugs
+
+v1.0.0 (06 December 2019)
+- Initial release

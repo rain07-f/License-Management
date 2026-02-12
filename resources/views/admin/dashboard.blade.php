@@ -1,165 +1,360 @@
 @extends('layouts.admin')
 
 @section('content')
-    <div class="container-fluid">
-        @if(auth()->user()->isSuperAdmin())
-            <!-- Super Admin Widgets -->
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card accent-main">
-                        <div class="card-body">
-                            <h6 class="text-muted mb-2">Total Users</h6>
-                            <h3 class="fw-bold mb-0 text-primary-dark">{{ $stats['total_users'] }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-info">
-                        <div class="card-body">
-                            <h6 class="text-muted mb-2">Distributors</h6>
-                            <h3 class="fw-bold mb-0 text-accent-blue">{{ $stats['total_distributors'] }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-main">
-                        <div class="card-body">
-                            <h6 class="text-muted mb-2">Total Licenses</h6>
-                            <h3 class="fw-bold mb-0 text-primary-dark">{{ $stats['total_licenses'] }}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-info">
-                        <div class="card-body">
-                            <h6 class="text-muted mb-2">Active Licenses</h6>
-                            <h3 class="fw-bold mb-0 text-accent-blue">{{ $stats['active_licenses'] }}</h3>
-                        </div>
-                    </div>
-                </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap grid-margin">
+        <div>
+            <h4 class="mb-3 mb-md-0">Welcome to Dashboard</h4>
+        </div>
+        <div class="d-flex align-items-center flex-wrap text-nowrap">
+            <div class="input-group flatpickr wd-200 me-2 mb-2 mb-md-0" id="dashboardDate">
+                <span class="input-group-text input-group-addon bg-transparent border-primary" data-toggle><i
+                        data-lucide="calendar" class="text-primary"></i></span>
+                <input type="text" class="form-control bg-transparent border-primary" placeholder="Select date" data-input>
             </div>
-
-            <div class="row mt-4">
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header d-flex align-items-center">
-                            <span>Monthly License Generation</span>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="licenseChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card accent-warning">
-                        <div class="card-body py-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="p-3 bg-danger-subtle text-danger rounded-circle me-3">
-                                    <i class="fa fa-exclamation-triangle fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h6 class="text-muted mb-1">Expired Licenses</h6>
-                                    <h3 class="fw-bold mb-0 text-danger-red">{{ $stats['expired_licenses'] }}</h3>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center mt-4">
-                                <div class="p-3 bg-info-subtle text-info rounded-circle me-3">
-                                    <i class="fa fa-globe fa-2x"></i>
-                                </div>
-                                <div>
-                                    <h6 class="text-muted mb-1">Active Domains</h6>
-                                    <h3 class="fw-bold mb-0 text-accent-blue">{{ $stats['active_domains'] }}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @elseif(auth()->user()->isDistributor())
-            <!-- Distributor Widgets -->
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="card accent-main">
-                        <div class="card-body text-center py-4">
-                            <h6 class="text-muted mb-2">Owned Licenses</h6>
-                            <h2 class="fw-bold mb-0 text-primary-dark">{{ $stats['total_licenses'] }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-info">
-                        <div class="card-body text-center py-4">
-                            <h6 class="text-muted mb-2">Remaining Quota</h6>
-                            <h2 class="fw-bold mb-0 text-accent-blue">{{ $stats['remaining_quota'] }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-main">
-                        <div class="card-body text-center py-4">
-                            <h6 class="text-muted mb-2">Active Licenses</h6>
-                            <h2 class="fw-bold mb-0 text-secondary-purple">{{ $stats['active_licenses'] }}</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card accent-warning">
-                        <div class="card-body text-center py-4">
-                            <h6 class="text-muted mb-2">Expired Licenses</h6>
-                            <h2 class="fw-bold mb-0 text-danger-red">{{ $stats['expired_licenses'] }}</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
+            <button type="button" class="btn btn-outline-primary btn-icon-text me-2 mb-2 mb-md-0">
+                <i class="btn-icon-prepend" data-lucide="printer"></i>
+                Print
+            </button>
+            <button type="button" class="btn btn-primary btn-icon-text mb-2 mb-md-0">
+                <i class="btn-icon-prepend" data-lucide="download-cloud"></i>
+                Download Report
+            </button>
+        </div>
     </div>
+
+    @if(auth()->user()->isSuperAdmin())
+        <div class="row">
+            <div class="col-12 col-xl-12 stretch-card">
+                <div class="row flex-grow-1">
+                    <div class="col-md-3 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <h6 class="card-title mb-0">Total Users</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 col-md-12 col-xl-5">
+                                        <h3 class="mb-2">{{ $stats['total_users'] }}</h3>
+                                        <div class="d-flex align-items-baseline">
+                                            <p class="text-success">
+                                                <span>+3.3%</span>
+                                                <i data-lucide="arrow-up" class="icon-sm mb-1"></i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-12 col-xl-7">
+                                        <div id="usersChart" class="mt-md-3 mt-xl-0"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <h6 class="card-title mb-0">Distributors</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 col-md-12 col-xl-5">
+                                        <h3 class="mb-2">{{ $stats['total_distributors'] }}</h3>
+                                        <div class="d-flex align-items-baseline">
+                                            <p class="text-danger">
+                                                <span>-2.8%</span>
+                                                <i data-lucide="arrow-down" class="icon-sm mb-1"></i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-12 col-xl-7">
+                                        <div id="distributorsChart" class="mt-md-3 mt-xl-0"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <h6 class="card-title mb-0">Total Licenses</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 col-md-12 col-xl-5">
+                                        <h3 class="mb-2">{{ $stats['total_licenses'] }}</h3>
+                                        <div class="d-flex align-items-baseline">
+                                            <p class="text-success">
+                                                <span>+1.5%</span>
+                                                <i data-lucide="arrow-up" class="icon-sm mb-1"></i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-12 col-xl-7">
+                                        <div id="licensesChart" class="mt-md-3 mt-xl-0"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 grid-margin stretch-card">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-baseline">
+                                    <h6 class="card-title mb-0">Active Licenses</h6>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 col-md-12 col-xl-5">
+                                        <h3 class="mb-2">{{ $stats['active_licenses'] }}</h3>
+                                        <div class="d-flex align-items-baseline">
+                                            <p class="text-success">
+                                                <span>+5.2%</span>
+                                                <i data-lucide="arrow-up" class="icon-sm mb-1"></i>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-12 col-xl-7">
+                                        <div id="activeLicensesChart" class="mt-md-3 mt-xl-0"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- row -->
+
+        <div class="row">
+            <div class="col-12 col-xl-12 grid-margin stretch-card">
+                <div class="card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-baseline mb-4 mb-md-3">
+                            <h6 class="card-title mb-0">Monthly License Generation</h6>
+                        </div>
+                        <div class="row align-items-start">
+                            <div class="col-md-7">
+                                <p class="text-secondary tx-13 mb-3 mb-md-0">Tracking the growth of license issuance across all
+                                    distributors and clients.</p>
+                            </div>
+                        </div>
+                        <div id="licenseGenerationChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- row -->
+
+        <div class="row">
+            <div class="col-md-6 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-baseline mb-2">
+                            <h6 class="card-title mb-0">Critical Stats</h6>
+                        </div>
+                        <div class="d-flex align-items-center border-bottom py-3">
+                            <div
+                                class="wd-50 ht-50 bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="alert-triangle"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="text-body mb-1">Expired Licenses</h6>
+                                <h4 class="text-danger fw-bolder">{{ $stats['expired_licenses'] }}</h4>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center py-3">
+                            <div
+                                class="wd-50 ht-50 bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="globe"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="text-body mb-1">Active Domains</h6>
+                                <h4 class="text-info fw-bolder">{{ $stats['active_domains'] }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @elseif(auth()->user()->isDistributor())
+        <div class="row">
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted mb-3">Owned Licenses</h6>
+                        <div class="d-flex align-items-center">
+                            <div
+                                class="wd-40 ht-40 bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="key"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bolder">{{ $stats['total_licenses'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card border-primary border-start border-4">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted mb-3">Remaining Quota</h6>
+                        <div class="d-flex align-items-center">
+                            <div
+                                class="wd-40 ht-40 bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="zap"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bolder text-info">{{ $stats['remaining_quota'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted mb-3">Active Licenses</h6>
+                        <div class="d-flex align-items-center">
+                            <div
+                                class="wd-40 ht-40 bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="check-circle"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bolder text-success">{{ $stats['active_licenses'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted mb-3">Expired Licenses</h6>
+                        <div class="d-flex align-items-center">
+                            <div
+                                class="wd-40 ht-40 bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="clock"></i>
+                            </div>
+                            <h2 class="mb-0 fw-bolder text-danger">{{ $stats['expired_licenses'] }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 @endsection
 
 @section('scripts')
     <script>
-        @if(auth()->user()->isSuperAdmin())
-            const ctx = document.getElementById('licenseChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {!! json_encode($stats['monthly_stats']->pluck('month')) !!},
-                    datasets: [{
-                        label: 'Licenses Generated',
-                        data: {!! json_encode($stats['monthly_stats']->pluck('count')) !!},
-                        backgroundColor: 'rgba(75, 73, 172, 0.1)',
-                        borderColor: '#4B49AC',
-                        borderWidth: 3,
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: '#4B49AC',
-                        pointBorderColor: '#fff',
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                                color: 'rgba(0,0,0,0.05)'
+        $(function () {
+            'use strict';
+
+            if ($('#dashboardDate').length) {
+                flatpickr("#dashboardDate", {
+                    wrap: true,
+                    defaultDate: "today"
+                });
+            }
+
+            @if(auth()->user()->isSuperAdmin())
+                var colors = {
+                    primary: "#6571ff",
+                    secondary: "#7987a1",
+                    success: "#05a34a",
+                    info: "#66d1d1",
+                    warning: "#fbbc06",
+                    danger: "#ff3366",
+                    light: "#e9ecef",
+                    dark: "#060c17",
+                    muted: "#7987a1",
+                    gridBorder: "rgba(77, 77, 77, .15)",
+                    bodyColor: "#000",
+                    cardBg: "#fff"
+                };
+
+                // License Generation Chart (ApexCharts)
+                if ($('#licenseGenerationChart').length) {
+                    var options = {
+                        chart: {
+                            type: "line",
+                            height: '400',
+                            parentHeightOffset: 0,
+                            foreColor: colors.muted,
+                            toolbar: {
+                                show: false
+                            },
+                            stacked: true,
+                        },
+                        theme: {
+                            mode: 'light'
+                        },
+                        tooltip: {
+                            theme: 'light'
+                        },
+                        colors: [colors.primary, colors.danger, colors.warning],
+                        grid: {
+                            padding: {
+                                bottom: -4
+                            },
+                            borderColor: colors.gridBorder,
+                            xaxis: {
+                                lines: {
+                                    show: true
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
+                        series: [{
+                            name: 'Generated',
+                            data: {!! json_encode($stats['monthly_stats']->pluck('count')) !!}
+                        }],
+                        xaxis: {
+                            type: 'category',
+                            categories: {!! json_encode($stats['monthly_stats']->pluck('month')) !!},
+                            lines: {
+                                show: true
+                            },
+                            axisBorder: {
+                                color: colors.gridBorder,
+                            },
+                            axisTicks: {
+                                color: colors.gridBorder,
+                            },
+                        },
+                        yaxis: {
+                            labels: {
+                                offsetX: 0
                             }
-                        }
-                    },
-                    plugins: {
+                        },
+                        markers: {
+                            size: 0,
+                        },
                         legend: {
-                            display: false
-                        }
-                    }
+                            show: true,
+                            position: "top",
+                            horizontalAlign: 'left',
+                            containerMargin: {
+                                top: 30
+                            }
+                        },
+                        stroke: {
+                            width: 3,
+                            curve: "smooth",
+                            lineCap: "round"
+                        },
+                    };
+                    var chart = new ApexCharts(document.querySelector("#licenseGenerationChart"), options);
+                    chart.render();
                 }
-            });
-        @endif
+
+                // Mini Sparklines
+                function createSparkline(selector, data, color) {
+                    var options = {
+                        series: [{ data: data }],
+                        chart: { type: 'line', width: 100, height: 35, sparkline: { enabled: true } },
+                        colors: [color],
+                        stroke: { width: 2, curve: 'smooth' },
+                        tooltip: { enabled: false }
+                    };
+                    new ApexCharts(document.querySelector(selector), options).render();
+                }
+
+                createSparkline("#usersChart", [10, 15, 8, 25], colors.primary);
+                createSparkline("#distributorsChart", [12, 11, 14, 10], colors.danger);
+                createSparkline("#licensesChart", [20, 30, 45, 40], colors.success);
+                createSparkline("#activeLicensesChart", [15, 25, 35, 38], colors.info);
+
+            @endif
+    });
     </script>
 @endsection

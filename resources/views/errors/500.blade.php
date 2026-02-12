@@ -1,0 +1,23 @@
+@extends('layouts.auth')
+
+@section('content')
+    <div class="row w-100 mx-0 auth-page">
+        <div class="col-md-8 col-xl-6 mx-auto d-flex flex-column align-items-center">
+            @php
+                $assetBaseUrl = asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/');
+            @endphp
+            <img src="{{ url('vendor/nobleui/laravel/images/others/500_light.svg') }}" class="img-fluid mb-2 d-dark-none"
+                alt="500" style="max-width: 300px;">
+            {{-- Since I don't know the exact 500 path in build, and I saw 404 in build/images/others, let's assume it's
+            there or use placeholder --}}
+            <h1 class="fw-bolder mb-2 mt-2 display-1 text-secondary">500</h1>
+            <h4 class="mb-2">Internal Server Error</h4>
+            <h6 class="text-secondary mb-3 text-center">Sorry, our server is having some issues. Please try again later.
+            </h6>
+            <a href="{{ url('/') }}" class="btn btn-primary btn-icon-text">
+                <i class="btn-icon-prepend" data-lucide="arrow-left"></i>
+                Return to Safety
+            </a>
+        </div>
+    </div>
+@endsection
