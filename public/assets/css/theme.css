@@ -1,0 +1,146 @@
+:root {
+    --primary-dark: #4B49AC;
+    --primary-light: #98BDFF;
+    --accent-blue: #7DA0FA;
+    --secondary-purple: #7978E9;
+    --danger-red: #F3797E;
+    --sidebar-bg: #4B49AC;
+    --sidebar-active: #7978E9;
+    --content-bg: #f4f7ff;
+    --card-radius: 10px;
+}
+
+body {
+    background-color: var(--content-bg);
+    font-family: 'Inter', sans-serif;
+    color: #333;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    min-height: 100vh;
+    color: white;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    position: fixed;
+}
+
+.main-content {
+    margin-left: 250px;
+}
+
+@media (max-width: 600px) {
+    .sidebar {
+        position: fixed;
+        left: -250px;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    border-radius: 0 25px 25px 0;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--sidebar-active);
+    color: white;
+}
+
+/* Navbar */
+.navbar {
+    background-color: white;
+    border-bottom: 2px solid var(--primary-light);
+    height: 70px;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: var(--card-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-weight: 600;
+}
+
+.card.accent-main {
+    border-top: 4px solid var(--primary-dark);
+}
+
+.card.accent-info {
+    border-top: 4px solid var(--accent-blue);
+}
+
+.card.accent-warning {
+    border-top: 4px solid var(--danger-red);
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-primary:hover {
+    background-color: #3a388f;
+    border-color: #3a388f;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-purple);
+    border-color: var(--secondary-purple);
+}
+
+.btn-info {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--danger-red);
+    border-color: var(--danger-red);
+}
+
+/* Badges */
+.badge-active {
+    background-color: var(--accent-blue);
+}
+
+.badge-expired {
+    background-color: var(--danger-red);
+}
+
+.badge-suspended {
+    background-color: var(--secondary-purple);
+}
+
+/* Utilities */
+.rounded-10 {
+    border-radius: 10px;
+}
+
+.soft-shadow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
