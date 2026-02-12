@@ -61,8 +61,10 @@
                                 <td class="py-3 text-muted">
                                     {{ $user->parent->name ?? 'None' }}
                                 </td>
-                                <td class="py-3 fw-bold text-primary-dark">
-                                    {{ $user->license_quota }}
+                                <td class="py-3">
+                                    <span class="badge bg-dark text-white fw-bold rounded-pill px-3">
+                                        {{ $user->license_quota }}
+                                    </span>
                                 </td>
                                 <td class="py-3 text-center">
                                     <span

@@ -39,7 +39,7 @@
                                     <span class="badge bg-info-subtle text-info px-3">{{ $plan->duration_days }} Days</span>
                                 </td>
                                 <td class="py-3">
-                                    <span class="badge bg-light text-dark px-3 fw-medium">{{ $plan->domain_limit }}
+                                    <span class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $plan->domain_limit }}
                                         Domains</span>
                                 </td>
                                 <td class="px-4 py-3 text-end">

@@ -75,7 +75,7 @@
                                     </span>
                                 </td>
                                 <td class="py-3 text-center">
-                                    <span class="badge bg-light text-primary-dark border fw-bold rounded-pill px-3">
+                                    <span class="badge bg-dark text-white fw-bold rounded-pill px-3">
                                         {{ $license->domains()->count() }} / {{ $license->max_domains }}
                                     </span>
                                 </td>
