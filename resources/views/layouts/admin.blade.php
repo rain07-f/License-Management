@@ -128,18 +128,21 @@
                         <div class="dropdown">
                             <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle"
                                 id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="me-2 fw-medium d-none d-sm-inline">{{ auth()->user()->name }}</span>
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                <span
+                                    class="me-2 fw-medium d-none d-sm-inline">{{ auth()->user()->full_name ?? auth()->user()->name }}</span>
+                                <div class="avatar-nav rounded-circle overflow-hidden shadow-sm"
                                     style="width: 32px; height: 32px;">
-                                    {{ substr(auth()->user()->name, 0, 1) }}
+                                    <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=4B49AC&color=fff' }}"
+                                        class="w-100 h-100 object-fit-cover">
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-10"
                                 aria-labelledby="userMenu">
-                                <li><a class="dropdown-item p-2" href="#"><i class="fa fa-user me-2 opacity-50"></i>
-                                        Profile</a></li>
+                                <li><a class="dropdown-item p-2" href="{{ route('admin.profile.edit') }}"><i
+                                            class="fa fa-user me-2 opacity-50"></i>
+                                        Identity Profile</a></li>
                                 <li><a class="dropdown-item p-2" href="#"><i class="fa fa-cog me-2 opacity-50"></i>
-                                        Settings</a></li>
+                                        System Configuration</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\LicenseController;
 use App\Http\Controllers\Admin\DomainController;
 use App\Http\Controllers\Admin\LogController;
+use App\Http\Controllers\Admin\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,7 +15,10 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
+// Route::post('/login', [LoginController::class, 'login']);
+Route::middleware(\Illuminate\Routing\Middleware\ThrottleRequests::with(10, 1))->group(function () {
+    Route::post('/login', [LoginController::class, 'login']);
+});
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Basic Auth for all roles
@@ -51,4 +55,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware(['role:super_admin,distributor'])->group(function () {
         Route::get('/quota-history', [UserController::class, 'quotaHistory'])->name('users.quota_history');
     });
+
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
 });

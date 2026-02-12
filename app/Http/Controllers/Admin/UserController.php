@@ -68,12 +68,15 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'full_name' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
             'password' => 'nullable|string|min:8',
             'status' => 'required|in:active,suspended',
         ]);
 
-        $data = $request->only(['name', 'email', 'status']);
+        $data = $request->only(['name', 'full_name', 'email', 'phone', 'company', 'status']);
         if ($request->password) {
             $data['password'] = Hash::make($request->password);
         }
