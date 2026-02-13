@@ -1,6 +1,3 @@
-@php
-    $sidebarBaseUrl = asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/');
-@endphp
 <nav class="sidebar">
     <div class="sidebar-header">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
@@ -75,8 +72,6 @@
                     <span class="link-title">API Documentation</span>
                 </a>
             </li>
-
-
 
             <li class="nav-item nav-category">Account</li>
             <li class="nav-item">

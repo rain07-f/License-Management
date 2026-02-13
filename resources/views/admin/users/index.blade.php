@@ -11,14 +11,14 @@
                     <input type="text" name="search" class="form-control rounded-pill-start border-0 ps-4"
                         placeholder="Search by name or email..." value="{{ request('search') }}">
                     <button class="btn btn-white rounded-pill-end border-0 pe-4" type="submit">
-                        <i class="fa fa-search text-muted"></i>
+                        <i data-lucide="search" class="text-muted icon-sm"></i>
                     </button>
                 </div>
             </form>
         </div>
         <div class="col-12 col-md-4 col-lg-4 text-center text-lg-end">
             <a href="{{ route('admin.users.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                <i class="fa fa-plus me-1"></i> Add User
+                <i data-lucide="plus" class="me-1 icon-sm"></i> Add User
             </a>
         </div>
     </div>
@@ -81,11 +81,11 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
                                             <li><a class="dropdown-item py-2" href="{{ route('admin.users.edit', $user) }}"><i
-                                                        class="fa fa-edit me-2 opacity-50"></i> Edit</a></li>
+                                                        data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
                                             @if($user->isDistributor())
                                                 <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
-                                                        data-bs-target="#quotaModal{{ $user->id }}"><i
-                                                            class="fa fa-plus me-2 opacity-50"></i> Add Quota</a></li>
+                                                        data-bs-target="#quotaModal{{ $user->id }}"><i data-lucide="plus"
+                                                            class="me-2 icon-sm opacity-50"></i> Add Quota</a></li>
                                             @endif
                                             <li>
                                                 <hr class="dropdown-divider">
@@ -95,7 +95,8 @@
                                                     onsubmit="return confirm('Delete this user?')">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="dropdown-item py-2 text-danger"><i
-                                                            class="fa fa-trash me-2 opacity-50"></i> Delete</button>
+                                                            data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i>
+                                                        Delete</button>
                                                 </form>
                                             </li>
                                         </ul>

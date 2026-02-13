@@ -2,10 +2,8 @@
     <div class="navbar-content">
 
         <div class="logo-mini-wrapper">
-            <img src="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/images/logo-mini-light.png') }}"
-                class="logo-mini logo-mini-light" alt="logo">
-            <img src="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/images/logo-mini-dark.png') }}"
-                class="logo-mini logo-mini-dark" alt="logo">
+            <img src="{{ asset('assets/images/logo-mini-light.png') }}" class="logo-mini logo-mini-light" alt="logo">
+            <img src="{{ asset('assets/images/logo-mini-dark.png') }}" class="logo-mini logo-mini-dark" alt="logo">
         </div>
 
         <form class="search-form">
@@ -45,7 +43,6 @@
                                 <span>Profile</span>
                             </a>
                         </li>
-
                         <li>
                             <hr class="dropdown-divider">
                         </li>

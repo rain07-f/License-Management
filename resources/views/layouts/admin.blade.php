@@ -1,5 +1,5 @@
 @php
-    $nobleAssetBase = 'nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/';
+    // Standard asset paths after refactor
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +14,7 @@
     <title>{{ $title ?? 'Dashboard' }} - License Manager</title>
 
     <!-- color-modes:js -->
-    <script src="{{ asset($nobleAssetBase . 'assets/color-modes-CkunOepb.js') }}"></script>
+    <script src="{{ asset('assets/js/color-modes-CkunOepb.js') }}"></script>
 
     <script>
         (function () {
@@ -32,21 +32,19 @@
 
     <meta name="_token" content="{{ csrf_token() }}">
 
-    <link rel="shortcut icon"
-        href="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
     <!-- Splash Screen -->
-    <link href="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/splash-screen.css') }}"
-        rel="stylesheet" />
+    <link href="{{ asset('assets/css/splash-screen.css') }}" rel="stylesheet" />
 
     <!-- plugin css -->
-    <link rel="stylesheet" href="{{ asset($nobleAssetBase . 'plugins/flag-icons/css/flag-icons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset($nobleAssetBase . 'plugins/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/flag-icons/css/flag-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}">
     <!-- end plugin css -->
 
     <!-- common css -->
-    <link rel="stylesheet" href="{{ asset($nobleAssetBase . 'assets/app-B-efjZPS.css') }}">
-    <link rel="stylesheet" href="{{ asset($nobleAssetBase . 'assets/custom-tn0RQdqM.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/app-B-efjZPS.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-tn0RQdqM.css') }}">
     <!-- end common css -->
 
     @stack('custom-styles')
@@ -109,20 +107,20 @@
     </div>
 
     <!-- base js -->
-    <script src="{{ asset($nobleAssetBase . 'plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset($nobleAssetBase . 'plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset($nobleAssetBase . 'assets/app-CAiCLEjY.js') }}"></script>
-    <script src="{{ asset($nobleAssetBase . 'plugins/lucide/lucide.min.js') }}"></script>
-    <script src="{{ asset($nobleAssetBase . 'plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/app-CAiCLEjY.js') }}"></script>
+    <script src="{{ asset('assets/plugins/lucide/lucide.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
     <!-- end base js -->
 
     <!-- plugin js -->
-    <script src="{{ asset($nobleAssetBase . 'plugins/flatpickr/flatpickr.min.js') }}"></script>
-    <script src="{{ asset($nobleAssetBase . 'plugins/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/flatpickr/flatpickr.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/apexcharts/apexcharts.min.js') }}"></script>
     <!-- end plugin js -->
 
     <!-- common js -->
-    <script src="{{ asset($nobleAssetBase . 'assets/template-B7IAR9tB.js') }}"></script>
+    <script src="{{ asset('assets/js/template-B7IAR9tB.js') }}"></script>
     <!-- end common js -->
 
     @stack('custom-scripts')

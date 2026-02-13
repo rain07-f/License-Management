@@ -1,5 +1,5 @@
 @php
-    $assetBaseUrl = asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/');
+    // Auth assets refactored
 @endphp
 
 <!DOCTYPE html>
@@ -11,7 +11,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>LicenseServer - Enterprise Authentication</title>
 
-    <script src="{{ $assetBaseUrl . '/assets/color-modes-CkunOepb.js' }}"></script>
+    <script src="{{ asset('assets/js/color-modes-CkunOepb.js') }}"></script>
     <script>
         (function () {
             const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -25,15 +25,13 @@
 
     <meta name="_token" content="{{ csrf_token() }}">
 
-    <link rel="shortcut icon"
-        href="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
     <!-- Splash Screen -->
-    <link href="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/splash-screen.css') }}"
-        rel="stylesheet" />
+    <link href="{{ asset('assets/css/splash-screen.css') }}" rel="stylesheet" />
 
-    <link rel="stylesheet" href="{{ $assetBaseUrl . '/assets/app-B-efjZPS.css' }}">
-    <link rel="stylesheet" href="{{ $assetBaseUrl . '/assets/custom-tn0RQdqM.css' }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/app-B-efjZPS.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/custom-tn0RQdqM.css') }}">
 
     @stack('custom-styles')
 </head>
@@ -60,11 +58,10 @@
         </div>
     </div>
 
-    <script src="{{ $assetBaseUrl . '/plugins/bootstrap/bootstrap.bundle.min.js' }}"></script>
-    <script src="{{ $assetBaseUrl . '/assets/app-CAiCLEjY.js' }}"></script>
-    <script
-        src="{{ asset('nobleui_extracted/NobleUI-Laravel-v3.0.1/template/demo1/public/build/plugins/lucide/lucide.min.js') }}"></script>
-    <script src="{{ $assetBaseUrl . '/assets/template-B7IAR9tB.js' }}"></script>
+    <script src="{{ asset('assets/plugins/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/js/app-CAiCLEjY.js') }}"></script>
+    <script src="{{ asset('assets/plugins/lucide/lucide.min.js') }}"></script>
+    <script src="{{ asset('assets/js/template-B7IAR9tB.js') }}"></script>
 
     @stack('custom-scripts')
     <script>

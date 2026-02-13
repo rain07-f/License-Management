@@ -105,44 +105,44 @@
                                         @csrf
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">System Username</label>
+                                                <label class="form-label">Username</label>
                                                 <input type="text" name="name" class="form-control"
                                                     value="{{ $user->name }}" required>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Full Display Name</label>
+                                                <label class="form-label">Full Name</label>
                                                 <input type="text" name="full_name" class="form-control"
                                                     value="{{ $user->full_name }}">
                                             </div>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Primary Email</label>
+                                                <label class="form-label">Email Address</label>
                                                 <input type="email" name="email" class="form-control"
                                                     value="{{ $user->email }}" required>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Mobile Contact</label>
+                                                <label class="form-label">Phone Number</label>
                                                 <input type="text" name="phone" class="form-control"
                                                     value="{{ $user->phone }}">
                                             </div>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Professional Affiliation</label>
+                                            <label class="form-label">Organization / Company</label>
                                             <input type="text" name="company" class="form-control"
                                                 value="{{ $user->company }}">
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Geographic Infrastructure</label>
+                                            <label class="form-label">Address / Location</label>
                                             <textarea name="address" class="form-control"
-                                                rows="3">{{ $user->address }}</textarea>
+                                                rows="2">{{ $user->address }}</textarea>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Professional Synopsis (Bio)</label>
-                                            <textarea name="bio" class="form-control" rows="4">{{ $user->bio }}</textarea>
+                                            <label class="form-label">Biography</label>
+                                            <textarea name="bio" class="form-control" rows="3">{{ $user->bio }}</textarea>
                                         </div>
                                         <div class="text-end">
-                                            <button type="submit" class="btn btn-primary btn-icon-text">
+                                            <button type="submit" class="btn btn-primary btn-icon-text text-white">
                                                 <i class="btn-icon-prepend" data-lucide="save"></i> Update Profile
                                             </button>
                                         </div>
@@ -151,28 +151,28 @@
                                 <div class="tab-pane fade" id="security-settings" role="tabpanel">
                                     <form id="security-form">
                                         @csrf
-                                        <div class="alert alert-fill-warning d-flex align-items-center mb-4">
-                                            <i data-lucide="shield" class="icon-md me-2"></i>
-                                            <span>Updating your password will fortify your security layers.</span>
+                                        <div class="alert alert-fill-warning d-flex align-items-center mb-4 border-0">
+                                            <i data-lucide="shield" class="icon-sm me-2"></i>
+                                            <span>Update your password to enhance account security.</span>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Current Security Token (Password)</label>
+                                            <label class="form-label">Current Password</label>
                                             <input type="password" name="current_password" class="form-control">
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">New Access Sequence</label>
+                                                <label class="form-label">New Password</label>
                                                 <input type="password" name="new_password" class="form-control">
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Confirm New Sequence</label>
+                                                <label class="form-label">Confirm New Password</label>
                                                 <input type="password" name="new_password_confirmation"
                                                     class="form-control">
                                             </div>
                                         </div>
                                         <div class="text-end">
                                             <button type="submit" class="btn btn-danger btn-icon-text">
-                                                <i class="btn-icon-prepend" data-lucide="lock"></i> Fortify Security
+                                                <i class="btn-icon-prepend" data-lucide="lock"></i> Update Password
                                             </button>
                                         </div>
                                     </form>

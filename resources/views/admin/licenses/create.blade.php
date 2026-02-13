@@ -4,69 +4,74 @@
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('admin.licenses.index') }}">Licenses</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Generate New License</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.licenses.index') }}">License Management</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Generate License</li>
         </ol>
     </nav>
 
-    <div class="row justify-content-center">
-        <div class="col-md-6 grid-margin stretch-card">
+    <div class="row">
+        <div class="col-md-7 grid-margin stretch-card mx-auto">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="card-title">Generate New License</h6>
-                        <a href="{{ route('admin.licenses.index') }}" class="btn btn-outline-primary btn-icon-text btn-sm">
-                            <i class="btn-icon-prepend" data-lucide="arrow-left"></i>
-                            Back to List
-                        </a>
-                    </div>
+                    <h6 class="card-title">Provision New License</h6>
+                    <p class="text-secondary mb-4">Select a subscription plan and optionally assign it to a client account.
+                    </p>
 
                     @if(auth()->user()->isDistributor())
-                        <div class="alert alert-fill-info d-flex align-items-center mb-4">
-                            <i data-lucide="info" class="icon-md me-2"></i>
-                            <span>Your remaining quota: <strong>{{ auth()->user()->license_quota }}</strong> licenses.</span>
+                        <div class="alert alert-fill-info d-flex align-items-center mb-4 border-0 shadow-sm">
+                            <i data-lucide="info" class="icon-sm me-2"></i>
+                            <div>Your remaining quota: <span
+                                    class="fw-bolder fs-5 ms-1">{{ auth()->user()->license_quota }}</span> licenses</div>
                         </div>
                     @endif
 
                     <form class="forms-sample" action="{{ route('admin.licenses.store') }}" method="POST">
                         @csrf
 
-                        <div class="mb-3">
-                            <label for="plan_id" class="form-label">Select Product/Plan</label>
+                        <div class="mb-4">
+                            <label for="plan_id" class="form-label fw-bold">Select Subscription Plan</label>
                             <select name="plan_id" id="plan_id" class="form-select @error('plan_id') is-invalid @enderror"
                                 required>
                                 <option value="" disabled selected>Choose a plan...</option>
                                 @foreach($plans as $plan)
-                                    <option value="{{ $plan->id }}">{{ $plan->name }} - ${{ $plan->price }}
-                                        ({{ $plan->duration_days }} Days, {{ $plan->domain_limit }} Domains)</option>
+                                    <option value="{{ $plan->id }}" {{ old('plan_id') == $plan->id ? 'selected' : '' }}>
+                                        {{ $plan->name }} — ${{ number_format($plan->price, 2) }}
+                                        ({{ $plan->duration_days }} days, {{ $plan->domain_limit }} domains)
+                                    </option>
                                 @endforeach
                             </select>
                             @error('plan_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="owner_id" class="form-label">Assign to Client (Optional)</label>
+                        <div class="mb-4">
+                            <label for="owner_id" class="form-label fw-bold">Client Assignment <small
+                                    class="text-muted">(Optional)</small></label>
                             <select name="owner_id" id="owner_id" class="form-select">
-                                <option value="">Keep for myself (Distributor)</option>
+                                <option value="">Keep for self (owned by you)</option>
                                 @foreach($clients as $client)
-                                    <option value="{{ $client->id }}">{{ $client->name }} ({{ $client->email }})</option>
+                                    <option value="{{ $client->id }}" {{ old('owner_id') == $client->id ? 'selected' : '' }}>
+                                        {{ $client->name }} ({{ $client->email }})
+                                    </option>
                                 @endforeach
                             </select>
-                            <div class="form-text text-muted">If you select a client, the license will be owned by them
-                                immediately.</div>
+                            <div class="form-text mt-2 text-secondary">Licenses transferred to clients will be deducted from
+                                your quota immediately.</div>
                         </div>
 
-                        <div class="bg-light p-3 rounded mb-4 d-flex align-items-center">
-                            <i data-lucide="shield-check" class="text-primary me-2"></i>
-                            <span class="tx-12 fw-medium">Secured SHA256 hashing will be applied to the generated
-                                key.</span>
+                        <div class="bg-light-subtle border p-3 rounded-3 mb-5 d-flex align-items-center opacity-75">
+                            <i data-lucide="shield-check" class="text-primary me-2 icon-sm"></i>
+                            <span class="tx-11 fw-medium text-secondary">System will generate a cryptographically secure key
+                                and encrypt it using SHA256 protocols.</span>
                         </div>
 
-                        <div class="text-center d-grid">
-                            <button type="submit" class="btn btn-primary btn-icon-text">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-icon-text py-2 shadow-sm text-white">
                                 <i class="btn-icon-prepend" data-lucide="zap"></i>
-                                Generate & Active Key
+                                Generate & Activate License
                             </button>
+                            <a href="{{ route('admin.licenses.index') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
                         </div>
                     </form>
                 </div>

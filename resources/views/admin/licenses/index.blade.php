@@ -11,18 +11,18 @@
                     <input type="text" name="search" class="form-control rounded-pill-start border-0 ps-4"
                         placeholder="Search by hash or owner..." value="{{ request('search') }}">
                     <button class="btn btn-white rounded-pill-end border-0 pe-4" type="submit">
-                        <i class="fa fa-search text-muted"></i>
+                        <i data-lucide="search" class="text-muted icon-sm"></i>
                     </button>
                 </div>
             </form>
         </div>
         <div class="col-12 col-md-4 col-lg-4 text-center text-lg-end">
             <a href="{{ route('admin.licenses.export') }}" class="btn btn-light rounded-pill px-4 border shadow-sm me-2">
-                <i class="fa fa-download me-1"></i> Export
+                <i data-lucide="download" class="me-1 icon-sm"></i> Export
             </a>
             @if(auth()->user()->role !== 'client')
                 <a href="{{ route('admin.licenses.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                    <i class="fa fa-magic me-1"></i> Generate License
+                    <i data-lucide="zap" class="me-1 icon-sm"></i> Generate License
                 </a>
             @endif
         </div>
@@ -93,18 +93,18 @@
                                             @if($license->status === 'active')
                                                 <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
                                                         data-bs-target="#assignModal{{ $license->id }}"><i
-                                                            class="fa fa-user-plus me-2 opacity-50"></i> Transfer Ownership</a></li>
+                                                            data-lucide="user-plus" class="me-2 icon-sm opacity-50"></i> Transfer Ownership</a></li>
                                                 <li>
                                                     <form action="{{ route('admin.licenses.revoke', $license) }}" method="POST"
                                                         onsubmit="return confirm('Revoke this license?')">
                                                         @csrf
                                                         <button type="submit" class="dropdown-item py-2 text-danger"><i
-                                                                class="fa fa-ban me-2 opacity-50"></i> Revoke License</button>
+                                                                data-lucide="slash" class="me-2 icon-sm opacity-50"></i> Revoke License</button>
                                                     </form>
                                                 </li>
                                             @endif
                                             <li><a class="dropdown-item py-2" href="#"><i
-                                                        class="fa fa-list me-2 opacity-50"></i> View Logs</a></li>
+                                                        data-lucide="list" class="me-2 icon-sm opacity-50"></i> View Logs</a></li>
                                         </ul>
                                     </div>
 
