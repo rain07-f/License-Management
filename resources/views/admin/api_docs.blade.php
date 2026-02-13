@@ -15,7 +15,7 @@
                     <h6 class="card-title">API Endpoints</h6>
                     <div class="mb-4">
                         <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Base URL</label>
-                        <div class="bg-light p-2 rounded">
+                        <div class="bg-dark p-2 rounded">
                             <code class="tx-12 text-primary">{{ url('/api/v1') }}</code>
                         </div>
                     </div>
@@ -84,21 +84,21 @@
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
                     <div class="bg-dark p-3 rounded">
                         <pre class="mb-0"><code>function activate_license($key, $domain) {
-                    $response = wp_remote_post('{{ url('/api/v1/activate') }}', [
-                        'headers' => [
-                            'X-API-Key' => 'YOUR_SECRET_KEY'
-                        ],
-                        'body' => [
-                            'license_key' => $key,
-                            'domain'      => $domain
-                        ]
-                    ]);
+                        $response = wp_remote_post('{{ url('/api/v1/activate') }}', [
+                            'headers' => [
+                                'X-API-Key' => 'YOUR_SECRET_KEY'
+                            ],
+                            'body' => [
+                                'license_key' => $key,
+                                'domain'      => $domain
+                            ]
+                        ]);
 
-                    if (is_wp_error($response)) return false;
+                        if (is_wp_error($response)) return false;
 
-                    $body = json_decode(wp_remote_retrieve_body($response), true);
-                    return $body['success'] ?? false;
-                }</code></pre>
+                        $body = json_decode(wp_remote_retrieve_body($response), true);
+                        return $body['success'] ?? false;
+                    }</code></pre>
                     </div>
                 </div>
             </section>
@@ -116,24 +116,24 @@
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
                     <div class="bg-dark p-3 rounded">
                         <pre class="mb-0"><code>function validate_license($key, $domain) {
-                    $response = wp_remote_post('{{ url('/api/v1/validate') }}', [
-                        'headers' => [
-                            'X-API-Key' => 'YOUR_SECRET_KEY'
-                        ],
-                        'body' => [
-                            'license_key' => $key,
-                            'domain'      => $domain
-                        ]
-                    ]);
+                        $response = wp_remote_post('{{ url('/api/v1/validate') }}', [
+                            'headers' => [
+                                'X-API-Key' => 'YOUR_SECRET_KEY'
+                            ],
+                            'body' => [
+                                'license_key' => $key,
+                                'domain'      => $domain
+                            ]
+                        ]);
 
-                    $body = json_decode(wp_remote_retrieve_body($response), true);
+                        $body = json_decode(wp_remote_retrieve_body($response), true);
 
-                    if (isset($body['success']) && $body['success']) {
-                        return true;
-                    }
+                        if (isset($body['success']) && $body['success']) {
+                            return true;
+                        }
 
-                    return false;
-                }</code></pre>
+                        return false;
+                    }</code></pre>
                     </div>
                 </div>
             </section>

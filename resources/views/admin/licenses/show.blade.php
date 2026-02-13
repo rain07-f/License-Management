@@ -33,7 +33,7 @@
 
                     <div class="row">
                         <div class="col-md-9">
-                            <div class="bg-light p-4 rounded mb-4 text-center">
+                            <div class="bg-dark p-4 rounded mb-4 text-center">
                                 <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">License Key</label>
                                 <h3 class="text-primary fw-bolder text-break">{{ $license->license_key_display }}</h3>
                                 <div class="mt-2 text-center">
@@ -102,7 +102,7 @@
                                                 <td class="tx-12">{{ $log->created_at->format('Y-m-d H:i') }}</td>
                                                 <td>
                                                     <span
-                                                        class="badge bg-light text-dark text-capitalize">{{ $log->action }}</span>
+                                                        class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $log->action }}</span>
                                                 </td>
                                                 <td class="tx-12">{{ $log->user->name ?? 'System' }}</td>
                                                 <td class="tx-12 fw-medium text-primary">{{ $log->domain ?? '-' }}</td>
