@@ -26,9 +26,7 @@
                                 class="h4 ms-3 text-white fw-bolder tx-20 shadow-sm">{{ $user->full_name ?? $user->name }}</span>
                         </div>
                         <div class="d-none d-md-block">
-                            <label for="avatar-input" class="btn btn-primary btn-icon-text">
-                                <i class="btn-icon-prepend" data-lucide="camera"></i> Edit Image
-                            </label>
+
                             <input type="file" id="avatar-input" class="d-none" accept="image/*">
                         </div>
                     </div>
@@ -88,7 +86,7 @@
             <div class="row">
                 <div class="col-md-12 grid-margin">
                     <div class="card">
-                        <div class="card-header bg-white border-bottom-0">
+                        <div class="card-header bg-dark border-bottom-0">
                             <ul class="nav nav-tabs nav-tabs-line" id="lineTab" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="home-line-tab" data-bs-toggle="tab" href="#personal-info"
