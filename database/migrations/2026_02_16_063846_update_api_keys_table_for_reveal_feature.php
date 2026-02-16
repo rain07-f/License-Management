@@ -10,13 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('api_keys', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('key_hash')->unique();
-            $table->text('key_enc');
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
+        Schema::table('api_keys', function (Blueprint $table) {
+            if (!Schema::hasColumn('api_keys', 'key_enc')) {
+                $table->text('key_enc')->after('key_hash')->nullable();
+            }
         });
     }
 
@@ -25,6 +22,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('api_keys');
+        Schema::table('api_keys', function (Blueprint $table) {
+            $table->dropColumn('key_enc');
+        });
     }
 };

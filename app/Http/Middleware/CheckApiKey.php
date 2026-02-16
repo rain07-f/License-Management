@@ -28,7 +28,7 @@ class CheckApiKey
         $hashedKey = \App\Models\ApiKey::hash($requestKey);
 
         $apiKey = \App\Models\ApiKey::active()
-            ->where('key', $hashedKey)
+            ->where('key_hash', $hashedKey)
             ->first();
 
         if (!$apiKey) {

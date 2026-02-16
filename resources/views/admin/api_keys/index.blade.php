@@ -28,7 +28,8 @@
                                 <div>
                                     <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
                                     <p class="text-dark small mb-2">Copy this key now. For security purposes, we will
-                                        <strong>never show it again</strong>.</p>
+                                        <strong>never show it again</strong>.
+                                    </p>
                                     <div class="input-group">
                                         <input type="text" class="form-control bg-light fw-mono font-monospace" id="newApiKey"
                                             value="{{ session('api_key') }}" readonly>
@@ -59,7 +60,8 @@
                                             <div class="fw-bold text-primary">{{ $key->name }}</div>
                                         </td>
                                         <td>
-                                            <code class="text-muted small">...{{ substr($key->key, -8) }}</code>
+                                            <code
+                                                class="text-muted small">{{ substr($key->key_hash, 0, 8) }}****{{ substr($key->key_hash, -8) }}</code>
                                         </td>
                                         <td>
                                             @if($key->is_active)
@@ -73,6 +75,13 @@
                                         </td>
                                         <td class="text-end">
                                             <div class="d-flex justify-content-end gap-2">
+                                                @if($key->is_active && Auth::user()->isSuperAdmin())
+                                                    <button type="button"
+                                                        class="btn btn-outline-primary btn-icon btn-sm reveal-key-btn"
+                                                        data-id="{{ $key->id }}" title="Reveal Key">
+                                                        <i data-lucide="eye"></i>
+                                                    </button>
+                                                @endif
                                                 @if($key->is_active)
                                                     <form action="{{ route('admin.api-keys.destroy', $key) }}" method="POST"
                                                         class="d-inline">
@@ -92,6 +101,15 @@
                                                         </button>
                                                     </form>
                                                 @endif
+                                                <form action="{{ route('admin.api-keys.permanent-delete', $key) }}"
+                                                    method="POST" class="d-inline"
+                                                    onsubmit="return confirm('Are you sure you want to permanently delete this API key? This action cannot be undone.')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
+                                                        title="Delete Permanently">
+                                                        <i data-lucide="trash-2"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -108,7 +126,7 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Generate Key Modal -->
     <div class="modal fade" id="generateKeyModal" tabindex="-1" aria-labelledby="generateKeyModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -138,14 +156,114 @@
         </div>
     </div>
 
+    <!-- Reveal Key Modal -->
+    <div class="modal fade" id="revealKeyModal" tabindex="-1" aria-labelledby="revealKeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="revealKeyModalLabel">Reveal API Key</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small mb-3">
+                        <i data-lucide="info" class="me-1" style="width: 14px; height: 14px;"></i>
+                        For security, this key will be hidden automatically in <span id="revealTimer">30</span> seconds.
+                    </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-light fw-mono font-monospace" id="revealedApiKey"
+                            readonly>
+                        <button class="btn btn-outline-primary" type="button" id="copyRevealedKeyBtn">
+                            <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const revealButtons = document.querySelectorAll('.reveal-key-btn');
+            const revealModal = new bootstrap.Modal(document.getElementById('revealKeyModal'));
+            const revealedInput = document.getElementById('revealedApiKey');
+            const timerSpan = document.getElementById('revealTimer');
+            const copyBtn = document.getElementById('copyRevealedKeyBtn');
+            let countdownInterval;
+
+            revealButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const keyId = this.dataset.id;
+
+                    fetch(`/admin/api-keys/${keyId}/reveal`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                revealedInput.value = data.key;
+                                revealModal.show();
+                                startCountdown();
+                            } else {
+                                alert(data.message || 'Failed to reveal key');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while revealing the key');
+                        });
+                });
+            });
+
+            function startCountdown() {
+                clearInterval(countdownInterval);
+                let seconds = 30;
+                timerSpan.textContent = seconds;
+
+                countdownInterval = setInterval(() => {
+                    seconds--;
+                    timerSpan.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(countdownInterval);
+                        revealModal.hide();
+                        revealedInput.value = '';
+                    }
+                }, 1000);
+            }
+
+            copyBtn.addEventListener('click', function () {
+                revealedInput.select();
+                revealedInput.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> Copied!';
+                this.classList.replace('btn-outline-primary', 'btn-success');
+
+                setTimeout(() => {
+                    this.innerHTML = originalContent;
+                    this.classList.replace('btn-success', 'btn-outline-primary');
+                    if (window.lucide) lucide.createIcons();
+                }, 2000);
+            });
+
+            document.getElementById('revealKeyModal').addEventListener('hidden.bs.modal', function () {
+                clearInterval(countdownInterval);
+                revealedInput.value = '';
+            });
+        });
+
         function copyToClipboard() {
             var copyText = document.getElementById("newApiKey");
             copyText.select();
             copyText.setSelectionRange(0, 99999);
             document.execCommand("copy");
-
-            // Optional: Show a toast or change button text
             alert("API Key copied to clipboard!");
         }
     </script>

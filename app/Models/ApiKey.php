@@ -16,9 +16,11 @@ class ApiKey extends Model
      */
     protected $fillable = [
         'name',
-        'key',
+        'key_hash',
+        'key_enc',
         'is_active',
     ];
+
 
     /**
      * Scope a query to only include active API keys.

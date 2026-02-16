@@ -54,6 +54,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // API Key Management
         Route::resource('api-keys', \App\Http\Controllers\Admin\ApiKeyController::class)->only(['index', 'store', 'destroy']);
         Route::post('/api-keys/{api_key}/activate', [\App\Http\Controllers\Admin\ApiKeyController::class, 'activate'])->name('api-keys.activate');
+        Route::delete('/api-keys/{api_key}/permanent-delete', [\App\Http\Controllers\Admin\ApiKeyController::class, 'permanentDelete'])->name('api-keys.permanent-delete');
+        Route::post('/api-keys/{api_key}/reveal', [\App\Http\Controllers\Admin\ApiKeyController::class, 'reveal'])
+            ->name('api-keys.reveal')
+            ->middleware('throttle:3,1');
     });
 
     Route::middleware(['role:super_admin,distributor'])->group(function () {
