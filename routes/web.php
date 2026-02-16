@@ -50,6 +50,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('users', UserController::class);
         Route::resource('plans', PlanController::class);
         Route::post('/users/{user}/quota', [UserController::class, 'addQuota'])->name('users.quota');
+
+        // API Key Management
+        Route::resource('api-keys', \App\Http\Controllers\Admin\ApiKeyController::class)->only(['index', 'store', 'destroy']);
+        Route::post('/api-keys/{api_key}/activate', [\App\Http\Controllers\Admin\ApiKeyController::class, 'activate'])->name('api-keys.activate');
     });
 
     Route::middleware(['role:super_admin,distributor'])->group(function () {

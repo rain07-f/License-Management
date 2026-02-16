@@ -40,6 +40,12 @@
                         <span class="link-title">Plans</span>
                     </a>
                 </li>
+                <li class="nav-item {{ request()->routeIs('admin.api-keys.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.api-keys.index') }}" class="nav-link">
+                        <i class="link-icon" data-lucide="shield-check"></i>
+                        <span class="link-title">API Keys</span>
+                    </a>
+                </li>
             @endif
 
             <li class="nav-item {{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">

@@ -1,0 +1,152 @@
+@extends('layouts.admin')
+
+@section('content')
+    <nav class="page-breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">API Key Management</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h6 class="card-title mb-0">API Keys</h6>
+                        <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal"
+                            data-bs-target="#generateKeyModal">
+                            <i class="btn-icon-prepend" data-lucide="plus"></i>
+                            Generate New API Key
+                        </button>
+                    </div>
+
+                    @if(Session::has('api_key'))
+                        <div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
+                            <div class="d-flex">
+                                <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
+                                <div>
+                                    <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
+                                    <p class="text-dark small mb-2">Copy this key now. For security purposes, we will
+                                        <strong>never show it again</strong>.</p>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light fw-mono font-monospace" id="newApiKey"
+                                            value="{{ session('api_key') }}" readonly>
+                                        <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard()">
+                                            <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Fingerprint (Last 8 of Hash)</th>
+                                    <th>Status</th>
+                                    <th>Created At</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($apiKeys as $key)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-primary">{{ $key->name }}</div>
+                                        </td>
+                                        <td>
+                                            <code class="text-muted small">...{{ substr($key->key, -8) }}</code>
+                                        </td>
+                                        <td>
+                                            @if($key->is_active)
+                                                <span class="badge bg-success-subtle text-success">Active</span>
+                                            @else
+                                                <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ $key->created_at->format('M d, Y H:i') }}
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                @if($key->is_active)
+                                                    <form action="{{ route('admin.api-keys.destroy', $key) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
+                                                            title="Deactivate">
+                                                            <i data-lucide="shield-off"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route('admin.api-keys.activate', $key) }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-outline-success btn-icon btn-sm"
+                                                            title="Reactivate">
+                                                            <i data-lucide="shield-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        {{ $apiKeys->links() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="generateKeyModal" tabindex="-1" aria-labelledby="generateKeyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ route('admin.api-keys.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="generateKeyModalLabel">Generate New API Key</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Key Name (e.g. Master App, WordPress Plugin)</label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                placeholder="Enter a descriptive name">
+                        </div>
+                        <div class="alert alert-info small">
+                            <strong>Note:</strong> API keys are hashed before storage. You will only see the plain key once
+                            after generation.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Generate Key</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard() {
+            var copyText = document.getElementById("newApiKey");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+
+            // Optional: Show a toast or change button text
+            alert("API Key copied to clipboard!");
+        }
+    </script>
+@endsection

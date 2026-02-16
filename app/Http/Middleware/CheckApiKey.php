@@ -15,20 +15,33 @@ class CheckApiKey
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $serverKey = env('LICENSE_API_KEY');
-
-        // If security key is not defined, we skip the check
-        if (!$serverKey) {
-            return $next($request);
-        }
-
         $requestKey = $request->header('X-API-Key');
 
-        if ($requestKey !== $serverKey) {
+        if (!$requestKey) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized: Invalid or missing X-API-Key header.',
+                'message' => 'API key missing',
             ], 401);
+        }
+
+        // Hash the incoming key to compare with the stored hash
+        $hashedKey = \App\Models\ApiKey::hash($requestKey);
+
+        $apiKey = \App\Models\ApiKey::active()
+            ->where('key', $hashedKey)
+            ->first();
+
+        if (!$apiKey) {
+            \Illuminate\Support\Facades\Log::warning('Unauthorized API access attempt', [
+                'ip' => $request->ip(),
+                'header' => $requestKey ? 'provided' : 'missing',
+                'url' => $request->fullUrl(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid API key',
+            ], 403);
         }
 
         return $next($request);
