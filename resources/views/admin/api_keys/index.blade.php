@@ -73,43 +73,53 @@
                                         <td>
                                             {{ $key->created_at->format('M d, Y H:i') }}
                                         </td>
-                                        <td class="text-end">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                @if($key->is_active && Auth::user()->isSuperAdmin())
-                                                    <button type="button"
-                                                        class="btn btn-outline-primary btn-icon btn-sm reveal-key-btn"
-                                                        data-id="{{ $key->id }}" title="Reveal Key">
-                                                        <i data-lucide="eye"></i>
-                                                    </button>
-                                                @endif
-                                                @if($key->is_active)
-                                                    <form action="{{ route('admin.api-keys.destroy', $key) }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
-                                                            title="Deactivate">
-                                                            <i data-lucide="shield-off"></i>
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <form action="{{ route('admin.api-keys.activate', $key) }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-outline-success btn-icon btn-sm"
-                                                            title="Reactivate">
-                                                            <i data-lucide="shield-check"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                                <form action="{{ route('admin.api-keys.permanent-delete', $key) }}"
-                                                    method="POST" class="d-inline"
-                                                    onsubmit="return confirm('Are you sure you want to permanently delete this API key? This action cannot be undone.')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
-                                                        title="Delete Permanently">
-                                                        <i data-lucide="trash-2"></i>
-                                                    </button>
-                                                </form>
+                                        <td class="px-4 py-3 text-end">
+                                            <div class="dropdown">
+                                                <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                    Action
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                                    @if($key->is_active && Auth::user()->isSuperAdmin())
+                                                        <li>
+                                                            <button type="button" class="dropdown-item py-2 reveal-key-btn" data-id="{{ $key->id }}">
+                                                                <i data-lucide="eye" class="me-2 icon-sm opacity-50"></i> Reveal Key
+                                                            </button>
+                                                        </li>
+                                                    @endif
+
+                                                    @if($key->is_active)
+                                                        <li>
+                                                            <form action="{{ route('admin.api-keys.destroy', $key) }}" method="POST">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" class="dropdown-item py-2 text-warning">
+                                                                    <i data-lucide="shield-off" class="me-2 icon-sm opacity-50"></i> Deactivate
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    @else
+                                                        <li>
+                                                            <form action="{{ route('admin.api-keys.activate', $key) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="dropdown-item py-2 text-success">
+                                                                    <i data-lucide="shield-check" class="me-2 icon-sm opacity-50"></i> Reactivate
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    @endif
+
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    
+                                                    <li>
+                                                        <form action="{{ route('admin.api-keys.permanent-delete', $key) }}" method="POST"
+                                                            onsubmit="return confirm('Are you sure you want to permanently delete this API key? This action cannot be undone.')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="dropdown-item py-2 text-danger">
+                                                                <i data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </td>
                                     </tr>

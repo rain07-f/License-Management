@@ -48,20 +48,34 @@
                                             <span class="badge bg-primary-subtle text-primary">{{ $plan->domain_limit }}
                                                 Domains</span>
                                         </td>
-                                        <td class="text-end">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <a href="{{ route('admin.plans.edit', $plan) }}"
-                                                    class="btn btn-outline-info btn-icon btn-sm" title="Edit">
-                                                    <i data-lucide="edit-2"></i>
-                                                </a>
-                                                <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
-                                                    class="d-inline" onsubmit="return confirm('Delete this plan?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-icon btn-sm"
-                                                        title="Delete">
-                                                        <i data-lucide="trash-2"></i>
-                                                    </button>
-                                                </form>
+                                        <td class="px-4 py-3 text-end">
+                                            <div class="dropdown">
+                                                <button
+                                                    class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                    Action
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                                    <li>
+                                                        <a class="dropdown-item py-2"
+                                                            href="{{ route('admin.plans.edit', $plan) }}">
+                                                            <i data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li>
+                                                        <form action="{{ route('admin.plans.destroy', $plan) }}" method="POST"
+                                                            onsubmit="return confirm('Are you sure you want to delete this plan?')">
+                                                            @csrf @method('DELETE')
+                                                            <button type="submit" class="dropdown-item py-2 text-danger">
+                                                                <i data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i>
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
                                             </div>
                                         </td>
                                     </tr>
