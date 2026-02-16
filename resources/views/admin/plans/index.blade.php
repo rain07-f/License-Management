@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="card-title mb-0">Subscription Plans</h6>
-                        <a href="{{ route('admin.plans.create') }}" class="btn btn-primary btn-icon-text">
+                        <a href="{{ route('admin.plans.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
                             <i class="btn-icon-prepend" data-lucide="plus"></i>
                             Create New Plan
                         </a>

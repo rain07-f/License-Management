@@ -14,7 +14,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h6 class="card-title mb-0">API Keys</h6>
-                        <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal"
+                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal"
                             data-bs-target="#generateKeyModal">
                             <i class="btn-icon-prepend" data-lucide="plus"></i>
                             Generate New API Key
