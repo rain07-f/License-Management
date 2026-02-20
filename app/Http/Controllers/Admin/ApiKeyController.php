@@ -41,6 +41,14 @@ class ApiKeyController extends Controller
             'is_active' => true,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'API Key generated successfully.',
+                'data' => ApiKey::where('key_hash', ApiKey::hash($plainKey))->first(),
+                'api_key' => $plainKey
+            ]);
+        }
 
         return Redirect::route('admin.api-keys.index')
             ->with('success', 'API Key generated successfully.')
@@ -53,6 +61,14 @@ class ApiKeyController extends Controller
     public function destroy(ApiKey $apiKey)
     {
         $apiKey->update(['is_active' => false]);
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'API Key has been deactivated.',
+                'data' => $apiKey->refresh()
+            ]);
+        }
+
         return Redirect::route('admin.api-keys.index')
             ->with('success', 'API Key has been deactivated.');
     }
@@ -63,6 +79,14 @@ class ApiKeyController extends Controller
     public function activate(ApiKey $apiKey)
     {
         $apiKey->update(['is_active' => true]);
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'API Key has been reactivated.',
+                'data' => $apiKey->refresh()
+            ]);
+        }
+
         return Redirect::route('admin.api-keys.index')
             ->with('success', 'API Key has been reactivated.');
     }
@@ -72,7 +96,16 @@ class ApiKeyController extends Controller
      */
     public function permanentDelete(ApiKey $apiKey)
     {
+        $apiKeyId = $apiKey->id;
         $apiKey->delete();
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'API Key has been permanently deleted.',
+                'id' => $apiKeyId
+            ]);
+        }
+
         return Redirect::route('admin.api-keys.index')
             ->with('success', 'API Key has been permanently deleted.');
     }

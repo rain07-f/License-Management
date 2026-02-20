@@ -25,7 +25,8 @@ class UserController extends Controller
         }
 
         $users = $query->latest()->paginate(10)->withQueryString();
-        return view('admin.users.index', compact('users'));
+        $distributors = User::where('role', 'distributor')->get();
+        return view('admin.users.index', compact('users', 'distributors'));
     }
 
     public function create()
@@ -45,7 +46,7 @@ class UserController extends Controller
             'license_quota' => 'nullable|integer|min:0',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -54,6 +55,14 @@ class UserController extends Controller
             'license_quota' => $request->license_quota ?? 0,
             'status' => 'active',
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully.',
+                'data' => $user->load('parent')
+            ]);
+        }
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -83,6 +92,14 @@ class UserController extends Controller
 
         $user->update($data);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully.',
+                'data' => $user->load('parent')
+            ]);
+        }
+
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
@@ -104,7 +121,29 @@ class UserController extends Controller
             ]);
         });
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Added {$request->quota} licenses to quota.",
+                'data' => $user->fresh()->load('parent')
+            ]);
+        }
+
         return back()->with('success', "Added {$request->quota} licenses to quota.");
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        $user->delete();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted successfully.'
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }
 
     public function quotaHistory()

@@ -16,15 +16,18 @@
                             <a href="#" class="noble-ui-logo d-block mb-2">License<span>Server</span></a>
                             <h5 class="text-secondary fw-normal mb-4">Welcome back! Log in to your account.</h5>
 
-                            @if($errors->any())
-                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                    <i data-lucide="alert-circle" class="icon-sm me-2"></i>
-                                    {{ $errors->first() }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                </div>
-                            @endif
+                            <div id="loginErrorArea">
+                                @if($errors->any())
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i data-lucide="alert-circle" class="icon-sm me-2"></i>
+                                        {{ $errors->first() }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                    </div>
+                                @endif
+                            </div>
 
-                            <form class="forms-sample" action="{{ route('login') }}" method="POST">
+                            <form class="forms-sample" id="loginForm" action="{{ route('login') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="userEmail" class="form-label text-secondary">Email address</label>
@@ -53,6 +56,48 @@
             </div>
         </div>
     </div>
+    @push('custom-scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                $(document).on('submit', '#loginForm', function (e) {
+                    e.preventDefault();
+                    let form = $(this);
+                    let btn = form.find('button[type=submit]');
+                    let errorArea = $('#loginErrorArea');
+
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize(),
+                        beforeSend: function () {
+                            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Logging in...');
+                            errorArea.empty();
+                        },
+                        success: function (res) {
+                            if (res.success) {
+                                window.location.href = res.redirect;
+                            }
+                        },
+                        error: function (xhr) {
+                            btn.prop('disabled', false).text('Login');
+                            let msg = 'An error occurred. Please try again.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            errorArea.html(`
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i data-lucide="alert-circle" class="icon-sm me-2"></i>
+                                        ${msg}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `);
+                            if (window.lucide) lucide.createIcons();
+                        }
+                    });
+                });
+            });
+        </script>
+    @endpush
 @endsection
 
 @push('custom-styles')

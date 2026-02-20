@@ -62,6 +62,13 @@ class DomainController extends Controller
         // Log the manual deactivation
         $this->licenseService->logAction($license, $user, 'deactivate', $domainName, request()->ip());
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Domain {$domainName} deactivated successfully."
+            ]);
+        }
+
         return back()->with('success', "Domain {$domainName} deactivated successfully.");
     }
 }

@@ -25,9 +25,22 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login successful, redirecting...',
+                    'redirect' => route('admin.dashboard')
+                ]);
+            }
             return redirect()->intended(route('admin.dashboard'));
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided credentials do not match our records.'
+            ], 422);
+        }
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
@@ -38,6 +51,15 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully.',
+                'redirect' => url('/')
+            ]);
+        }
+
         return redirect('/');
     }
 }

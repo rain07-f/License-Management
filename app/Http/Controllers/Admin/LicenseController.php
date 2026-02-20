@@ -43,7 +43,14 @@ class LicenseController extends Controller
         }
 
         $licenses = $query->latest()->paginate(10)->withQueryString();
-        return view('admin.licenses.index', compact('licenses'));
+        $plans = Plan::all();
+        $clients = [];
+        if (auth()->user()->isSuperAdmin()) {
+            $clients = User::where('role', 'client')->get();
+        } else {
+            $clients = User::where('parent_id', auth()->id())->where('role', 'client')->get();
+        }
+        return view('admin.licenses.index', compact('licenses', 'plans', 'clients'));
     }
 
     public function export()
@@ -113,9 +120,22 @@ class LicenseController extends Controller
 
         try {
             $license = $this->licenseService->generate($generator, $owner, $plan);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'License generated successfully.',
+                    'data' => $license->load(['owner', 'plan', 'generator']),
+                    'display_key' => $license->license_key_display
+                ]);
+            }
+
             return redirect()->route('admin.licenses.index')
                 ->with('success', 'License generated successfully. KEY: ' . $license->license_key_display);
         } catch (Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             return back()->with('error', $e->getMessage());
         }
     }
@@ -126,6 +146,14 @@ class LicenseController extends Controller
 
         $license->update(['owner_id' => $request->client_id]);
         $this->licenseService->logAction($license, auth()->user(), 'transfer');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License assigned to client successfully.',
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+            ]);
+        }
 
         return back()->with('success', 'License assigned to client successfully.');
     }
@@ -149,6 +177,14 @@ class LicenseController extends Controller
         $license->update(['status' => 'revoked']);
         $this->licenseService->logAction($license, auth()->user(), 'revoke');
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License revoked.',
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+            ]);
+        }
+
         return back()->with('success', 'License revoked.');
     }
 
@@ -159,8 +195,20 @@ class LicenseController extends Controller
 
         try {
             $this->licenseService->renew($license, auth()->user(), $plan);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'License renewed successfully.',
+                    'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                ]);
+            }
+
             return back()->with('success', 'License renewed successfully.');
         } catch (Exception $e) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
             return back()->with('error', $e->getMessage());
         }
     }

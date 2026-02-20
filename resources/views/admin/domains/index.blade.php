@@ -75,8 +75,8 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <form action="{{ route('admin.domains.destroy', $domain) }}" method="POST"
-                                                onsubmit="return confirm('Deactivate this domain?')">
+                                            <form class="domainDeactivateForm"
+                                                action="{{ route('admin.domains.destroy', $domain) }}" method="POST">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger btn-icon btn-xs"
                                                     title="Deactivate">
@@ -106,4 +106,29 @@
             </div>
         </div>
     </div>
+    @push('custom-scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // AJAX Deactivate
+                $(document).on('submit', '.domainDeactivateForm', function (e) {
+                    e.preventDefault();
+                    let form = $(this);
+                    let row = form.closest('tr');
+
+                    if (confirm('Are you sure you want to deactivate this domain?')) {
+                        $.ajax({
+                            url: form.attr('action'),
+                            method: 'POST',
+                            data: form.serialize(),
+                            success: function (res) {
+                                if (res.success) {
+                                    row.fadeOut(300, function () { $(this).remove(); });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+    @endpush
 @endsection

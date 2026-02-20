@@ -30,7 +30,15 @@ class PlanController extends Controller
             'price' => 'required|numeric|min:0',
         ]);
 
-        Plan::create($request->all());
+        $plan = Plan::create($request->all());
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan created successfully.',
+                'data' => $plan
+            ]);
+        }
 
         return redirect()->route('admin.plans.index')->with('success', 'Plan created successfully.');
     }
@@ -52,12 +60,28 @@ class PlanController extends Controller
 
         $plan->update($request->all());
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan updated successfully.',
+                'data' => $plan
+            ]);
+        }
+
         return redirect()->route('admin.plans.index')->with('success', 'Plan updated successfully.');
     }
 
     public function destroy(Plan $plan)
     {
         $plan->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan deleted successfully.'
+            ]);
+        }
+
         return redirect()->route('admin.plans.index')->with('success', 'Plan deleted successfully.');
     }
 }
