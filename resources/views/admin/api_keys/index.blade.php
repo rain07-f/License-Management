@@ -28,12 +28,12 @@
                             <div class="d-flex">
                                 <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
                                 <div>
-                                    <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
-                                    <p class="text-dark small mb-2">Copy this key now. For security purposes, we will
+                                    <p class="fw-bold text-light mb-1">New API Key Generated!</p>
+                                    <p class="text-lightgit small mb-2">Copy this key now. For security purposes, we will
                                         <strong>never show it again</strong>.
                                     </p>
                                     <div class="input-group">
-                                        <input type="text" class="form-control bg-light fw-mono font-monospace" id="newApiKey"
+                                        <input type="text" class="form-control bg-dark fw-mono font-monospace" id="newApiKey"
                                             value="{{ session('api_key') }}" readonly>
                                         <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('newApiKey')">
                                             <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
