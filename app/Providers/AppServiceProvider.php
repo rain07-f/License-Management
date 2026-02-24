@@ -10,6 +10,7 @@ use App\Listeners\UpdateLastLoginAt;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
             Login::class,
             UpdateLastLoginAt::class
         );
+
+        Paginator::useBootstrapFive();
 
         RateLimiter::for('license_api', function (Request $request) {
             $apiKey = $request->header('X-API-Key') ?? $request->query('api_key');
