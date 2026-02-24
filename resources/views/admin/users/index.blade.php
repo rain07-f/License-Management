@@ -157,8 +157,8 @@
             <div class="modal-content border-0 shadow">
                 <form id="quickAddUserForm" action="{{ route('admin.users.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header border-0 bg-light">
-                        <h5 class="modal-title fw-bold">Quick Add User</h5>
+                    <div class="modal-header border-0 bg-dark">
+                        <h5 class="modal-title fw-bold">Add User</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
@@ -220,60 +220,60 @@
                     let quotaAction = '';
                     if (user.role === 'distributor') {
                         quotaAction = `
-                                <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
-                                        data-bs-target="#quotaModal${user.id}"><i data-lucide="plus"
-                                            class="me-2 icon-sm opacity-50"></i> Add Quota</a></li>
-                            `;
+                                                <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                                        data-bs-target="#quotaModal${user.id}"><i data-lucide="plus"
+                                                            class="me-2 icon-sm opacity-50"></i> Add Quota</a></li>
+                                            `;
                     }
 
                     return `
-                            <tr id="userRow-${user.id}">
-                                <td class="px-4 py-3">
-                                    <div class="d-flex align-items-center">
-                                        <div class="bg-primary-subtle text-primary-dark rounded-circle d-flex align-items-center justify-content-center me-3"
-                                            style="width: 40px; height: 40px;">
-                                            ${user.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-semibold">${user.name}</h6>
-                                            <small class="text-muted">${user.email}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3">
-                                    <span class="badge ${roleBadgeClass} text-capitalize">${roleLabel}</span>
-                                </td>
-                                <td class="py-3 text-muted">${parentName}</td>
-                                <td class="py-3">
-                                    <span class="badge bg-dark text-white fw-bold rounded-pill px-3">${user.license_quota}</span>
-                                </td>
-                                <td class="py-3 text-center">
-                                    <span class="badge ${statusBadgeClass} text-capitalize">${user.status}</span>
-                                </td>
-                                <td class="px-4 py-3 text-end">
-                                    <div class="dropdown">
-                                        <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
-                                            type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                            Action
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
-                                            <li><a class="dropdown-item py-2" href="/admin/users/${user.id}/edit"><i
-                                                        data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
-                                            ${quotaAction}
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li>
-                                                <form class="userDeleteForm" action="/admin/users/${user.id}" method="POST">
-                                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                                    <input type="hidden" name="_method" value="DELETE">
-                                                    <button type="submit" class="dropdown-item py-2 text-danger"><i
-                                                            data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
+                                            <tr id="userRow-${user.id}">
+                                                <td class="px-4 py-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-primary-subtle text-primary-dark rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                            style="width: 40px; height: 40px;">
+                                                            ${user.name.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="mb-0 fw-semibold">${user.name}</h6>
+                                                            <small class="text-muted">${user.email}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="py-3">
+                                                    <span class="badge ${roleBadgeClass} text-capitalize">${roleLabel}</span>
+                                                </td>
+                                                <td class="py-3 text-muted">${parentName}</td>
+                                                <td class="py-3">
+                                                    <span class="badge bg-dark text-white fw-bold rounded-pill px-3">${user.license_quota}</span>
+                                                </td>
+                                                <td class="py-3 text-center">
+                                                    <span class="badge ${statusBadgeClass} text-capitalize">${user.status}</span>
+                                                </td>
+                                                <td class="px-4 py-3 text-end">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                                            type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                            Action
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                                            <li><a class="dropdown-item py-2" href="/admin/users/${user.id}/edit"><i
+                                                                        data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
+                                                            ${quotaAction}
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <form class="userDeleteForm" action="/admin/users/${user.id}" method="POST">
+                                                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                                    <input type="hidden" name="_method" value="DELETE">
+                                                                    <button type="submit" class="dropdown-item py-2 text-danger"><i
+                                                                            data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `;
                 }
 
                 // AJAX Create

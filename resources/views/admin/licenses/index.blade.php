@@ -165,8 +165,8 @@
             <div class="modal-content border-0 shadow">
                 <form id="quickGenerateForm" action="{{ route('admin.licenses.store') }}" method="POST">
                     @csrf
-                    <div class="modal-header border-0 bg-light">
-                        <h5 class="modal-title fw-bold">Quick Generate License</h5>
+                    <div class="modal-header border-0 bg-dark">
+                        <h5 class="modal-title fw-bold">Generate License</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">

@@ -7,7 +7,7 @@
                 <div class="row">
                     <div class="col-md-4 pe-md-0">
                         <div class="auth-side-wrapper"
-                            style="background-image: url('https://via.placeholder.com/219x452');">
+                            style="background-image: url('https://astoryn.id/wp-content/uploads/2026/01/LogoAstorien1.svg');">
                             {{-- NobleUI usually has an image here --}}
                         </div>
                     </div>
@@ -16,18 +16,17 @@
                             <a href="#" class="noble-ui-logo d-block mb-2">License<span>Server</span></a>
                             <h5 class="text-secondary fw-normal mb-4">Welcome back! Log in to your account.</h5>
 
-                            <div id="loginErrorArea">
-                                @if($errors->any())
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i data-lucide="alert-circle" class="icon-sm me-2"></i>
-                                        {{ $errors->first() }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                            aria-label="Close"></button>
-                                    </div>
-                                @endif
-                            </div>
+                            <div id="authAlert" style="display: none;"></div>
 
-                            <form class="forms-sample" id="loginForm" action="{{ route('login') }}" method="POST">
+                            @if($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i data-lucide="alert-circle" class="icon-sm me-2"></i>
+                                    {{ $errors->first() }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            <form id="loginForm" class="forms-sample" action="{{ route('login') }}" method="POST">
                                 @csrf
                                 <div class="mb-3">
                                     <label for="userEmail" class="form-label text-secondary">Email address</label>
@@ -56,49 +55,43 @@
             </div>
         </div>
     </div>
-    @push('custom-scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                $(document).on('submit', '#loginForm', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let btn = form.find('button[type=submit]');
-                    let errorArea = $('#loginErrorArea');
-
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: form.serialize(),
-                        beforeSend: function () {
-                            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Logging in...');
-                            errorArea.empty();
-                        },
-                        success: function (res) {
-                            if (res.success) {
-                                window.location.href = res.redirect;
-                            }
-                        },
-                        error: function (xhr) {
-                            btn.prop('disabled', false).text('Login');
-                            let msg = 'An error occurred. Please try again.';
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                msg = xhr.responseJSON.message;
-                            }
-                            errorArea.html(`
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        <i data-lucide="alert-circle" class="icon-sm me-2"></i>
-                                        ${msg}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                `);
-                            if (window.lucide) lucide.createIcons();
-                        }
-                    });
-                });
-            });
-        </script>
-    @endpush
 @endsection
+
+@push('custom-scripts')
+    <script>
+        $(document).on('submit', '#loginForm', function (e) {
+            e.preventDefault();
+
+            let form = $(this);
+            let btn = form.find('button[type=submit]');
+            let alertDiv = $('#authAlert');
+
+            AjaxHelper.request({
+                url: form.attr('action'),
+                method: "POST",
+                data: form.serialize(),
+                beforeSend: function () {
+                    btn.prop('disabled', true).html(
+                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...'
+                    );
+                    alertDiv.hide().removeClass('alert-danger alert-success');
+                },
+                onSuccess: function (res) {
+                    if (res.success && res.redirect) {
+                        alertDiv.addClass('alert alert-success').text(res.message).show();
+                        window.location.href = res.redirect;
+                    }
+                },
+                onError: function (xhr) {
+                    btn.prop('disabled', false).text('Login');
+                    if (xhr.status !== 422) {
+                        alertDiv.addClass('alert alert-danger').text('An error occurred. Please try again.').show();
+                    }
+                }
+            });
+        });
+    </script>
+@endpush
 
 @push('custom-styles')
     <style>
