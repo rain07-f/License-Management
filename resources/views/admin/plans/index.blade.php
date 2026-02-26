@@ -34,6 +34,7 @@
                                     <th>Price</th>
                                     <th>Duration</th>
                                     <th>Domain Limit</th>
+                                    <th>Activation Limit</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -53,6 +54,10 @@
                                         <td>
                                             <span class="badge bg-primary-subtle text-primary">{{ $plan->domain_limit }}
                                                 Domains</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success">{{ $plan->activation_limit }}
+                                                Activations</span>
                                         </td>
                                         <td class="px-4 py-3 text-end">
                                             <div class="dropdown">
@@ -130,9 +135,16 @@
                                     required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">Domain Limit</label>
-                            <input type="number" name="domain_limit" class="form-control" min="1" value="1" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-medium">Domain Limit</label>
+                                <input type="number" name="domain_limit" class="form-control" min="1" value="1" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-medium">Activation Limit</label>
+                                <input type="number" name="activation_limit" class="form-control" min="1" value="1"
+                                    required>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
@@ -153,43 +165,46 @@
                     const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(plan.price);
 
                     return `
-                                    <tr id="planRow-${plan.id}">
-                                        <td>
-                                            <div class="fw-bold text-primary">${plan.name}</div>
-                                            <small class="text-secondary d-block mt-1">${plan.description}</small>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bolder fs-5 text-dark">${formattedPrice}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info-subtle text-info">${plan.duration_days} Days</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-primary-subtle text-primary">${plan.domain_limit} Domains</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-end">
-                                            <div class="dropdown">
-                                                <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
-                                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                                    Action
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
-                                                    <li><a class="dropdown-item py-2" href="/admin/plans/${plan.id}/edit"><i
-                                                                data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li>
-                                                        <form class="planDeleteForm" action="/admin/plans/${plan.id}" method="POST">
-                                                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                                            <input type="hidden" name="_method" value="DELETE">
-                                                            <button type="submit" class="dropdown-item py-2 text-danger"><i
-                                                                    data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                `;
+                                            <tr id="planRow-${plan.id}">
+                                                <td>
+                                                    <div class="fw-bold text-primary">${plan.name}</div>
+                                                    <small class="text-secondary d-block mt-1">${plan.description}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="fw-bolder fs-5 text-dark">${formattedPrice}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-info-subtle text-info">${plan.duration_days} Days</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-primary-subtle text-primary">${plan.domain_limit} Domains</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-success-subtle text-success">${plan.activation_limit} Activations</span>
+                                                </td>
+                                                <td class="px-4 py-3 text-end">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                                            type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                            Action
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                                            <li><a class="dropdown-item py-2" href="/admin/plans/${plan.id}/edit"><i
+                                                                        data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <form class="planDeleteForm" action="/admin/plans/${plan.id}" method="POST">
+                                                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                                    <input type="hidden" name="_method" value="DELETE">
+                                                                    <button type="submit" class="dropdown-item py-2 text-danger"><i
+                                                                            data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `;
                 }
 
                 // AJAX Create

@@ -41,7 +41,7 @@
                             <th class="py-3">Owner</th>
                             <th class="py-3">Plan</th>
                             <th class="py-3">Status</th>
-                            <th class="py-3 text-center">Domains</th>
+                            <th class="py-3 text-center">Activations</th>
                             <th class="py-3">Expires At</th>
                             <th class="px-4 py-3 text-end">Actions</th>
                         </tr>
@@ -79,7 +79,7 @@
                                 </td>
                                 <td class="py-3 text-center">
                                     <span class="badge bg-dark text-white fw-bold rounded-pill px-3">
-                                        {{ $license->domains()->count() }} / {{ $license->max_domains }}
+                                        {{ $license->activations->count() }} / {{ $license->activation_quota }}
                                     </span>
                                 </td>
                                 <td class="py-3 text-muted">
@@ -105,8 +105,17 @@
                                                     </form>
                                                 </li>
                                             @endif
-                                            <li><a class="dropdown-item py-2" href="#"><i
-                                                        data-lucide="list" class="me-2 icon-sm opacity-50"></i> View Logs</a></li>
+                                            <li><a class="dropdown-item py-2" href="{{ route('admin.licenses.show', $license) }}"><i
+                                                        data-lucide="eye" class="me-2 icon-sm opacity-50"></i> View Details</a></li>
+                                            @if(auth()->user()->role !== 'client')
+                                                <li>
+                                                    <form class="licenseFormDelete" action="{{ route('admin.licenses.destroy', $license) }}" method="POST">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="dropdown-item py-2 text-danger fw-bold"><i
+                                                                data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently</button>
+                                                    </form>
+                                                </li>
+                                            @endif
                                         </ul>
                                     </div>
 
@@ -235,7 +244,8 @@
                 const ownerRole = license.owner ? license.owner.role : '';
                 const planName = license.plan ? license.plan.name : 'Unknown';
                 const expiresAt = license.expires_at ? new Date(license.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never';
-                const domainsCount = license.domains ? license.domains.length : 0;
+                const activationsCount = license.activations ? license.activations.length : 0;
+                const activationQuota = license.activation_quota || (license.plan ? license.plan.activation_limit : 1);
                 
                 let actions = '';
                 if (license.status === 'active') {
@@ -253,12 +263,26 @@
                     `;
                 }
 
+                let deleteBtn = '';
+                @if(auth()->user()->role !== 'client')
+                deleteBtn = `
+                    <li>
+                        <form class="licenseFormDelete" action="/admin/licenses/${license.id}" method="POST">
+                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="dropdown-item py-2 text-danger fw-bold"><i
+                                    data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently</button>
+                        </form>
+                    </li>
+                `;
+                @endif
+
                 return `
                     <tr id="licenseRow-${license.id}">
                         <td class="px-4 py-3">
                             <a href="/admin/licenses/${license.id}" class="text-decoration-none">
                                 <span class="font-monospace fw-medium text-primary-dark small">
-                                    ${license.license_key_hash.substr(0, 12)}...
+                                    ${license.license_key_display.substr(0, 12)}...
                                 </span>
                             </a>
                         </td>
@@ -274,7 +298,7 @@
                         </td>
                         <td class="py-3 text-center">
                             <span class="badge bg-dark text-white fw-bold rounded-pill px-3">
-                                ${domainsCount} / ${license.max_domains || license.plan.domain_limit}
+                                ${activationsCount} / ${activationQuota}
                             </span>
                         </td>
                         <td class="py-3 text-muted">${expiresAt}</td>
@@ -286,7 +310,8 @@
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
                                     ${actions}
-                                    <li><a class="dropdown-item py-2" href="#"><i data-lucide="list" class="me-2 icon-sm opacity-50"></i> View Logs</a></li>
+                                    <li><a class="dropdown-item py-2" href="/admin/licenses/${license.id}"><i data-lucide="eye" class="me-2 icon-sm opacity-50"></i> View Details</a></li>
+                                    ${deleteBtn}
                                 </ul>
                             </div>
                         </td>
@@ -371,6 +396,26 @@
                                 const updatedRow = buildLicenseRow(res.data);
                                 row.replaceWith(updatedRow);
                                 if (window.lucide) lucide.createIcons();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // AJAX Delete
+            $(document).on('submit', '.licenseFormDelete', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let row = form.closest('tr');
+
+                if(confirm('PERMANENTLY DELETE this license? This cannot be undone.')) {
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize(),
+                        success: function(res) {
+                            if(res.success) {
+                                row.fadeOut(300, function() { $(this).remove(); });
                             }
                         }
                     });

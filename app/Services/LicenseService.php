@@ -39,6 +39,7 @@ class LicenseService
                 'status' => 'active',
                 'expires_at' => now()->addDays($plan->duration_days),
                 'max_domains' => $plan->domain_limit,
+                'activation_quota' => $plan->activation_limit,
             ]);
 
             $this->logAction($license, $generator, 'generate');
@@ -66,7 +67,7 @@ class LicenseService
     {
         $hash = hash('sha256', $plainKey);
         $license = License::where('license_key_hash', $hash)
-            ->with(['plan', 'domains'])
+            ->with(['plan', 'activations'])
             ->first();
 
         if (!$license) {

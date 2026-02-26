@@ -27,6 +27,7 @@ class PlanController extends Controller
             'description' => 'required|string',
             'duration_days' => 'required|integer|min:1',
             'domain_limit' => 'required|integer|min:1',
+            'activation_limit' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
         ]);
 
@@ -55,6 +56,7 @@ class PlanController extends Controller
             'description' => 'required|string',
             'duration_days' => 'required|integer|min:1',
             'domain_limit' => 'required|integer|min:1',
+            'activation_limit' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
         ]);
 

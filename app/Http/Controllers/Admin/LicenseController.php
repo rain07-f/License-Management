@@ -23,7 +23,7 @@ class LicenseController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = License::with(['owner', 'plan', 'generator']);
+        $query = License::with(['owner', 'plan', 'generator', 'activations']);
 
         if (!$user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
@@ -56,7 +56,7 @@ class LicenseController extends Controller
     public function export()
     {
         $user = auth()->user();
-        $query = License::with(['owner', 'plan']);
+        $query = License::with(['owner', 'plan', 'activations']);
 
         if (!$user->isSuperAdmin()) {
             $query->where('generated_by', $user->id);
@@ -75,7 +75,7 @@ class LicenseController extends Controller
 
         $callback = function () use ($licenses) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'Owner', 'Plan', 'Key Hash', 'Status', 'Expires At', 'Domains Used', 'Created At']);
+            fputcsv($file, ['ID', 'Owner', 'Plan', 'Key Hash', 'Status', 'Expires At', 'Activations Used', 'Created At']);
 
             foreach ($licenses as $l) {
                 fputcsv($file, [
@@ -85,7 +85,7 @@ class LicenseController extends Controller
                     $l->license_key_hash,
                     $l->status,
                     $l->expires_at ? $l->expires_at->format('Y-m-d') : 'Never',
-                    $l->domains->count(),
+                    $l->activations->count(),
                     $l->created_at->format('Y-m-d')
                 ]);
             }
@@ -125,7 +125,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License generated successfully.',
-                    'data' => $license->load(['owner', 'plan', 'generator']),
+                    'data' => $license->load(['owner', 'plan', 'generator', 'activations']),
                     'display_key' => $license->license_key_display
                 ]);
             }
@@ -151,7 +151,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License assigned to client successfully.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'activations'])
             ]);
         }
 
@@ -167,7 +167,7 @@ class LicenseController extends Controller
             abort(403);
         }
 
-        $license->load(['owner', 'plan', 'generator', 'domains.activator', 'logs.user']);
+        $license->load(['owner', 'plan', 'generator', 'activations', 'logs.user']);
         $plans = Plan::all();
         return view('admin.licenses.show', compact('license', 'plans'));
     }
@@ -181,7 +181,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License revoked.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'activations'])
             ]);
         }
 
@@ -200,7 +200,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License renewed successfully.',
-                    'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                    'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'activations'])
                 ]);
             }
 
@@ -211,5 +211,44 @@ class LicenseController extends Controller
             }
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function destroy(License $license)
+    {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && $license->owner_id !== $user->id && $license->generated_by !== $user->id) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized.'], 403);
+            }
+            abort(403);
+        }
+
+        $this->licenseService->logAction($license, $user, 'revoke'); // Log before deletion
+        $license->delete();
+
+        if (request()->ajax()) {
+            return response()->json(['success' => true, 'message' => 'License deleted permanently.']);
+        }
+
+        return redirect()->route('admin.licenses.index')->with('success', 'License deleted permanently.');
+    }
+
+    public function revokeActivation(Request $request, \App\Models\LicenseActivation $activation)
+    {
+        $license = $activation->license;
+        $user = auth()->user();
+
+        if (!$user->isSuperAdmin() && $license->owner_id !== $user->id && $license->generated_by !== $user->id) {
+            abort(403);
+        }
+
+        $activation->update([
+            'status' => 'revoked',
+            'revoked_at' => now()
+        ]);
+
+        $this->licenseService->logAction($license, $user, 'revoke_domain', $activation->domain);
+
+        return back()->with('success', 'Activation revoked successfully.');
     }
 }

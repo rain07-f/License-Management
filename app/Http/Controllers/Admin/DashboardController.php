@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\License;
-use App\Models\Domain;
+use App\Models\LicenseActivation;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -22,7 +22,7 @@ class DashboardController extends Controller
                 'total_licenses' => License::count(),
                 'active_licenses' => License::where('status', 'active')->count(),
                 'expired_licenses' => License::where('status', 'expired')->count(),
-                'active_domains' => Domain::where('status', 'active')->count(),
+                'active_activations' => LicenseActivation::where('status', 'active')->count(),
                 'monthly_stats' => $this->getMonthlyStats(),
             ];
         } else if ($user->isDistributor()) {
@@ -35,7 +35,9 @@ class DashboardController extends Controller
         } else {
             $stats = [
                 'total_licenses' => License::where('owner_id', $user->id)->count(),
-                'active_domains' => Domain::where('activated_by', $user->id)->count(),
+                'active_activations' => LicenseActivation::whereHas('license', function ($q) use ($user) {
+                    $q->where('owner_id', $user->id);
+                })->where('status', 'active')->count(),
             ];
         }
 

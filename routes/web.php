@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\LicenseController;
-use App\Http\Controllers\Admin\DomainController;
+use App\Http\Controllers\Admin\ActivationController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -36,13 +36,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/licenses/{license}/assign', [LicenseController::class, 'assign'])->name('licenses.assign');
         Route::post('/licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
+        Route::post('/activations/{activation}/revoke', [LicenseController::class, 'revokeActivation'])->name('activations.revoke');
     });
 
     Route::resource('licenses', LicenseController::class)->only(['index', 'show']);
 
-    // Domains & Logs
-    Route::get('/domains', [DomainController::class, 'index'])->name('domains.index');
-    Route::delete('/domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');
+    // Activations & Logs
+    Route::get('/activations', [ActivationController::class, 'index'])->name('activations.index');
+    Route::delete('/activations/{activation}', [ActivationController::class, 'destroy'])->name('activations.destroy');
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
     // Super Admin Only

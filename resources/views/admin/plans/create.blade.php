@@ -54,11 +54,28 @@
                                 @error('duration_days') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label for="planDomainLimit" class="form-label">Domain Limit</label>
-                                <input type="number" name="domain_limit"
-                                    class="form-control @error('domain_limit') is-invalid @enderror" id="planDomainLimit"
-                                    placeholder="1" value="{{ old('domain_limit') }}" required>
-                                @error('domain_limit') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Domain Limit</label>
+                                            <input type="number" name="domain_limit"
+                                                class="form-control @error('domain_limit') is-invalid @enderror"
+                                                placeholder="100" min="1" value="{{ old('domain_limit', 1) }}" required>
+                                            @error('domain_limit') <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div><!-- Col -->
+                                    <div class="col-sm-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Activation Limit</label>
+                                            <input type="number" name="activation_limit"
+                                                class="form-control @error('activation_limit') is-invalid @enderror"
+                                                placeholder="100" min="1" value="{{ old('activation_limit', 1) }}" required>
+                                            @error('activation_limit') <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div><!-- Col -->
+                                </div><!-- Row -->
                             </div>
                         </div>
 

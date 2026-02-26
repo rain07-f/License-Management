@@ -53,12 +53,20 @@
                                     value="{{ old('duration_days', $plan->duration_days) }}" required>
                                 @error('duration_days') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-2 mb-3">
                                 <label for="planDomainLimit" class="form-label">Domain Limit</label>
                                 <input type="number" name="domain_limit"
                                     class="form-control @error('domain_limit') is-invalid @enderror" id="planDomainLimit"
                                     value="{{ old('domain_limit', $plan->domain_limit) }}" required>
                                 @error('domain_limit') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="planActivationLimit" class="form-label">Activation Limit</label>
+                                <input type="number" name="activation_limit"
+                                    class="form-control @error('activation_limit') is-invalid @enderror"
+                                    id="planActivationLimit" value="{{ old('activation_limit', $plan->activation_limit) }}"
+                                    required>
+                                @error('activation_limit') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 

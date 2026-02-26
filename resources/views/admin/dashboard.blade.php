@@ -150,8 +150,8 @@
                                 <i data-lucide="globe"></i>
                             </div>
                             <div class="flex-grow-1">
-                                <h6 class="text-body mb-1">Active Domains</h6>
-                                <h4 class="text-info fw-bolder">{{ $stats['active_domains'] }}</h4>
+                                <h6 class="text-body mb-1">Active Activations</h6>
+                                <h4 class="text-info fw-bolder">{{ $stats['active_activations'] ?? 0 }}</h4>
                             </div>
                         </div>
                     </div>
@@ -341,6 +341,6 @@
                 createSparkline("#activeLicensesChart", [15, 25, 35, 38], colors.info);
 
             @endif
-        });
+            });
     </script>
 @endsection

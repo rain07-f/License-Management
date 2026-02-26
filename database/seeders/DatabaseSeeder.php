@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Single domain license for 1 year',
             'duration_days' => 365,
             'domain_limit' => 1,
+            'activation_limit' => 10,
             'price' => 29.00,
         ]);
 
@@ -38,6 +39,7 @@ class DatabaseSeeder extends Seeder
             'description' => '3 domains license for 1 year',
             'duration_days' => 365,
             'domain_limit' => 3,
+            'activation_limit' => 50,
             'price' => 79.00,
         ]);
 
@@ -46,6 +48,7 @@ class DatabaseSeeder extends Seeder
             'description' => 'Unlimited domains license for 1 year',
             'duration_days' => 365,
             'domain_limit' => 999,
+            'activation_limit' => 1000,
             'price' => 499.00,
         ]);
     }

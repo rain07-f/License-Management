@@ -48,10 +48,10 @@
                 </li>
             @endif
 
-            <li class="nav-item {{ request()->routeIs('admin.domains.*') ? 'active' : '' }}">
-                <a href="{{ route('admin.domains.index') }}" class="nav-link">
-                    <i class="link-icon" data-lucide="globe"></i>
-                    <span class="link-title">Activated Domains</span>
+            <li class="nav-item {{ request()->routeIs('admin.activations.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.activations.index') }}" class="nav-link">
+                    <i class="link-icon" data-lucide="shield-check"></i>
+                    <span class="link-title">License Activations</span>
                 </a>
             </li>
 

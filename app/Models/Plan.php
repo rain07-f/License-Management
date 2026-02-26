@@ -11,6 +11,7 @@ class Plan extends Model
         'description',
         'duration_days',
         'domain_limit',
+        'activation_limit',
         'price',
     ];
 

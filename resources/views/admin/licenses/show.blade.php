@@ -74,8 +74,9 @@
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Activation
                                         Status</label>
-                                    <span class="fw-bold">{{ $license->domains->count() }} / {{ $license->max_domains }}
-                                        Domains Used</span>
+                                    <span class="fw-bold">{{ $license->activations->count() }} /
+                                        {{ $license->activation_quota }}
+                                        Pairs Used</span>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Created At</label>
@@ -92,7 +93,7 @@
                                             <th>Timestamp</th>
                                             <th>Action</th>
                                             <th>User</th>
-                                            <th>Domain</th>
+                                            <th>Details</th>
                                             <th>IP Address</th>
                                         </tr>
                                     </thead>
@@ -102,7 +103,7 @@
                                                 <td class="tx-12">{{ $log->created_at->format('Y-m-d H:i') }}</td>
                                                 <td>
                                                     <span
-                                                        class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $log->action }}</span>
+                                                        class="badge bg-dark text-white fw-bold rounded-pill px-3 text-uppercase">{{ $log->action }}</span>
                                                 </td>
                                                 <td class="tx-12">{{ $log->user->name ?? 'System' }}</td>
                                                 <td class="tx-12 fw-medium text-primary">{{ $log->domain ?? '-' }}</td>
@@ -122,30 +123,47 @@
                             <div class="card border mb-3">
                                 <div class="card-body">
                                     <h6 class="card-title tx-13 mb-3 d-flex align-items-center">
-                                        <i data-lucide="globe" class="icon-sm me-2 text-primary"></i>
-                                        Activated Domains
+                                        <i data-lucide="shield" class="icon-sm me-2 text-primary"></i>
+                                        Active Pairs
                                     </h6>
                                     <div class="list-group list-group-flush">
-                                        @forelse($license->domains as $domain)
-                                            <div
-                                                class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
-                                                <div>
-                                                    <p class="mb-0 fw-semibold tx-13">{{ $domain->domain_name }}</p>
-                                                    <small
-                                                        class="text-muted tx-11">{{ $domain->activated_at->format('M d, Y') }}</small>
+                                        @forelse($license->activations->where('status', 'active') as $activation)
+                                            <div class="list-group-item px-0 py-3 border-bottom">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div>
+                                                        <p class="mb-0 fw-bold tx-13 text-primary">{{ $activation->domain }}</p>
+                                                        <small class="text-muted tx-11 font-monospace">UID:
+                                                            {{ $activation->device_uid }}</small>
+                                                    </div>
+                                                    <form action="{{ route('admin.activations.revoke', $activation) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Revoke this activation? Domain and Device UID will remain locked to this license.')">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-link text-danger p-0"
+                                                            title="Revoke Pair">
+                                                            <i data-lucide="minus-circle" class="icon-sm"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
-                                                <form action="{{ route('admin.domains.destroy', $domain) }}" method="POST"
-                                                    onsubmit="return confirm('Deactivate this domain?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-link text-danger p-0"
-                                                        title="Deactivate">
-                                                        <i data-lucide="minus-circle" class="icon-sm"></i>
-                                                    </button>
-                                                </form>
+                                                <small class="text-muted tx-10 d-block mt-1">
+                                                    Activated: {{ $activation->activated_at->format('M d, H:i') }}
+                                                </small>
                                             </div>
                                         @empty
-                                            <p class="tx-12 text-muted text-center py-3">No active domains found.</p>
+                                            <p class="tx-12 text-muted text-center py-3">No active pairs found.</p>
                                         @endforelse
+
+                                        @if($license->activations->where('status', 'revoked')->count() > 0)
+                                            <hr>
+                                            <h6 class="tx-11 text-muted text-uppercase mb-2">Revoked (Locked)</h6>
+                                            @foreach($license->activations->where('status', 'revoked') as $revoked)
+                                                <div class="mb-2 opacity-50">
+                                                    <small
+                                                        class="d-block fw-bold tx-11 text-decoration-line-through">{{ $revoked->domain }}</small>
+                                                    <small class="tx-10 font-monospace">UID: {{ $revoked->device_uid }}</small>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -190,7 +208,8 @@
                                 <select name="plan_id" id="plan_id" class="form-select" required>
                                     @foreach($plans as $plan)
                                         <option value="{{ $plan->id }}" {{ $license->plan_id == $plan->id ? 'selected' : '' }}>
-                                            {{ $plan->name }} ({{ $plan->duration_days }} Days - {{ $plan->domain_limit }} Domains)
+                                            {{ $plan->name }} ({{ $plan->duration_days }} Days - {{ $plan->activation_limit }}
+                                            Activations)
                                         </option>
                                     @endforeach
                                 </select>

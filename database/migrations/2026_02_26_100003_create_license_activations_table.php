@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+        Schema::create('license_activations', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('license_id')->constrained()->onDelete('cascade');
+            $table->string('domain');
+            $table->string('device_uid');
+            $table->enum('status', ['active', 'revoked'])->default('active');
+            $table->timestamp('activated_at');
+            $table->timestamp('revoked_at')->nullable();
+            $table->timestamps();
+
+            // Indexes for strict locking
+            $table->unique(['license_id', 'domain']);
+            $table->unique(['license_id', 'device_uid']);
+            $table->index('status');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('license_activations');
+    }
+};

@@ -15,6 +15,7 @@ class License extends Model
         'status',
         'expires_at',
         'max_domains',
+        'activation_quota',
     ];
 
     protected $casts = [
@@ -36,9 +37,10 @@ class License extends Model
         return $this->belongsTo(Plan::class);
     }
 
-    public function domains()
+
+    public function activations()
     {
-        return $this->hasMany(Domain::class);
+        return $this->hasMany(LicenseActivation::class);
     }
 
     public function logs()
