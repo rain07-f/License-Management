@@ -90,18 +90,23 @@
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            @if($activation->status === 'active')
-                                                <form class="activationRevokeForm"
-                                                    action="{{ route('admin.activations.destroy', $activation) }}" method="POST">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger btn-icon btn-xs"
-                                                        title="Revoke Activation">
-                                                        <i data-lucide="x-circle"></i>
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <span class="text-muted small">Locked</span>
-                                            @endif
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{{ route('admin.activations.show', $activation) }}"
+                                                    class="btn btn-outline-primary btn-icon btn-xs" title="View Details">
+                                                    <i data-lucide="eye"></i>
+                                                </a>
+                                                @if($activation->status === 'active')
+                                                    <form class="activationRevokeForm"
+                                                        action="{{ route('admin.activations.destroy', $activation) }}"
+                                                        method="POST">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-icon btn-xs"
+                                                            title="Revoke Activation">
+                                                            <i data-lucide="x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

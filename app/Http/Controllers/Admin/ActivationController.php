@@ -55,6 +55,29 @@ class ActivationController extends Controller
     }
 
     /**
+     * View activation details.
+     */
+    public function show(LicenseActivation $activation)
+    {
+        $user = auth()->user();
+
+        // Authorization check
+        if (!$user->isSuperAdmin() && $activation->license->owner_id !== $user->id) {
+            abort(403);
+        }
+
+        $activation->load([
+            'license.owner',
+            'license.plan',
+            'license.logs' => function ($q) use ($activation) {
+                $q->where('domain', $activation->domain)->latest();
+            }
+        ]);
+
+        return view('admin.activations.show', compact('activation'));
+    }
+
+    /**
      * Revoke a specific activation.
      */
     public function destroy(LicenseActivation $activation)

@@ -43,6 +43,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
     // Activations & Logs
     Route::get('/activations', [ActivationController::class, 'index'])->name('activations.index');
+    Route::get('/activations/{activation}', [ActivationController::class, 'show'])->name('activations.show');
     Route::delete('/activations/{activation}', [ActivationController::class, 'destroy'])->name('activations.destroy');
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
