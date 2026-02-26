@@ -56,7 +56,7 @@ class LicenseService
         for ($i = 0; $i < 4; $i++) {
             $parts[] = strtoupper(Str::random(4));
         }
-        return 'DCTL-' . implode('-', $parts);
+        return 'LIC07-' . implode('-', $parts);
     }
 
     /**
