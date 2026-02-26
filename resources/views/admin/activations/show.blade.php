@@ -42,6 +42,34 @@
                             <p class="text-danger">{{ $activation->revoked_at->format('M d, Y H:i:s') }}</p>
                         </div>
                     @endif
+
+                    @if($activation->status === 'active')
+                        <hr class="my-4">
+                        <div class="d-grid gap-2">
+                            <form action="{{ route('admin.activations.destroy', $activation) }}" method="POST"
+                                class="activationActionForm">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                    class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2"
+                                    data-type="domain">
+                                    <i data-lucide="shield-off" class="icon-sm"></i> Revoke Domain
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.activations.destroy', $activation) }}" method="POST"
+                                class="activationActionForm">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                    class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center gap-2"
+                                    data-type="device">
+                                    <i data-lucide="unplug" class="icon-sm"></i> Unbind Device
+                                </button>
+                            </form>
+                        </div>
+                        <p class="text-muted tx-11 mt-3 px-1 text-center italic">
+                            <i data-lucide="info" class="icon-xs pb-1"></i>
+                            This will free up 1 activation slot.
+                        </p>
+                    @endif
                 </div>
             </div>
 
@@ -79,14 +107,16 @@
                             @forelse($activation->license->logs as $log)
                                 <div class="timeline-item">
                                     <div class="timeline-indicator">
-                                        <div class="dot {{ $log->action === 'revoke_pair' ? 'bg-danger' : 'bg-primary' }}">
-                                        </div>
+                                        @php
+                                            $isDanger = in_array($log->action, ['revoke_pair', 'revoke_domain', 'unbind_device']);
+                                        @endphp
+                                        <div class="dot {{ $isDanger ? 'bg-danger' : 'bg-primary' }}"></div>
                                         <div class="line"></div>
                                     </div>
                                     <div class="timeline-content">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span
-                                                class="badge {{ $log->action === 'revoke_pair' ? 'bg-danger' : 'bg-primary' }} bg-opacity-10 text-{{ $log->action === 'revoke_pair' ? 'danger' : 'primary' }} text-uppercase tx-10 fw-bolder px-2 py-1">
+                                                class="badge {{ $isDanger ? 'bg-danger' : 'bg-primary' }} bg-opacity-10 text-{{ $isDanger ? 'danger' : 'primary' }} text-uppercase tx-10 fw-bolder px-2 py-1">
                                                 {{ str_replace('_', ' ', $log->action) }}
                                             </span>
                                             <span
@@ -122,6 +152,40 @@
         </div>
     </div>
 @endsection
+
+@push('custom-scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // AJAX Revoke/Unbind
+            $(document).on('submit', '.activationActionForm', function (e) {
+                e.preventDefault();
+                let form = $(this);
+                let button = form.find('button');
+                let type = button.data('type');
+
+                let message = type === 'domain'
+                    ? 'Are you sure you want to REVOKE this domain? This will free up 1 validation slot.'
+                    : 'Are you sure you want to UNBIND this device? This will free up 1 validation slot.';
+
+                if (confirm(message)) {
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize() + '&action_type=' + type,
+                        success: function (res) {
+                            if (res.success) {
+                                location.reload();
+                            }
+                        },
+                        error: function (xhr) {
+                            alert(xhr.responseJSON?.message || 'Error occurred');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+@endpush
 
 @push('custom-styles')
     <style>

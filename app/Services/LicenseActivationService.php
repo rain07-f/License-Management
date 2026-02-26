@@ -25,7 +25,7 @@ class LicenseActivationService
                 $this->verifySecurity($domain, $deviceUid, $fingerprint, $timestamp);
             }
 
-            // 2. Check Existing Activation (Strict Locking)
+            // 2. Check Existing Activation
             $existing = LicenseActivation::where('license_id', $license->id)
                 ->where(function ($query) use ($domain, $deviceUid) {
                     $query->where('domain', $domain)
@@ -35,25 +35,40 @@ class LicenseActivationService
 
             if ($existing) {
                 // CASE A: Exact same pair exists & active -> IDEMPOTENT Success
-                if ($existing->domain === $domain && $existing->device_uid === $deviceUid && $existing->status === 'active') {
+                if ($existing->domain === $domain && $existing->device_uid === $deviceUid) {
+                    if ($existing->status === 'active') {
+                        return $license;
+                    }
+
+                    // CASE B: Same pair exists but revoked -> Reactivate (Freeing the slot was the goal)
+                    $existing->update([
+                        'status' => 'active',
+                        'activated_at' => now(),
+                        'revoked_at' => null
+                    ]);
                     return $license;
                 }
 
-                // CASE B & C: Domain or Device already used (even if revoked)
-                if ($existing->domain === $domain) {
-                    throw new Exception("Domain already locked.", 403);
+                // CASE C: Another active activation uses this domain or device
+                if ($existing->status === 'active') {
+                    if ($existing->domain === $domain) {
+                        throw new Exception("Domain already in use by another active activation.", 403);
+                    }
+                    if ($existing->device_uid === $deviceUid) {
+                        throw new Exception("Device already in use by another active activation.", 403);
+                    }
                 }
-                if ($existing->device_uid === $deviceUid) {
-                    throw new Exception("Device locked.", 403);
-                }
+
+                // If it was revoked, we fall through to create a new record (or reuse the logic above)
             }
 
-            // 3. Check Quota
-            // Based on "Tidak membuka slot baru (STRICT)", we count ALL activations (active + revoked)
-            $count = LicenseActivation::where('license_id', $license->id)->count();
+            // 3. Check Quota (Count only ACTIVE activations)
+            $activeCount = LicenseActivation::where('license_id', $license->id)
+                ->where('status', 'active')
+                ->count();
 
-            if ($count >= $license->activation_quota) {
-                throw new Exception("Activation quota exceeded.", 403);
+            if ($activeCount >= $license->activation_quota) {
+                throw new Exception("Activation quota exceeded. Please revoke an old activation first.", 403);
             }
 
             // 4. Insert Activation

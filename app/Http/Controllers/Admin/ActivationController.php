@@ -80,7 +80,7 @@ class ActivationController extends Controller
     /**
      * Revoke a specific activation.
      */
-    public function destroy(LicenseActivation $activation)
+    public function destroy(Request $request, LicenseActivation $activation)
     {
         $user = auth()->user();
 
@@ -101,8 +101,14 @@ class ActivationController extends Controller
             'revoked_at' => now(),
         ]);
 
+        // Determine action for logging
+        $action = 'revoke_pair';
+        if ($request->has('action_type')) {
+            $action = $request->action_type === 'device' ? 'unbind_device' : 'revoke_domain';
+        }
+
         // Log action
-        $this->licenseService->logAction($activation->license, $user, 'revoke_pair', $activation->domain, request()->ip());
+        $this->licenseService->logAction($activation->license, $user, $action, $activation->domain, request()->ip());
 
         if (request()->ajax()) {
             return response()->json([

@@ -140,7 +140,7 @@
                     let form = $(this);
                     let row = form.closest('tr');
 
-                    if (confirm('Are you sure you want to revoke this activation? This will PERMANENTLY lock this domain and device for this license.')) {
+                    if (confirm('Are you sure you want to revoke this activation? This will free up 1 license slot.')) {
                         $.ajax({
                             url: form.attr('action'),
                             method: 'POST',

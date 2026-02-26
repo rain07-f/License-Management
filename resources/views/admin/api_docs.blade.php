@@ -49,13 +49,13 @@
         </div>
 
         <div class="col-md-8">
-            <div class="alert alert-fill-danger mb-4 d-flex align-items-center">
-                <i data-lucide="alert-triangle" class="icon-md me-3"></i>
+            <div class="alert alert-fill-info mb-4 d-flex align-items-center">
+                <i data-lucide="info" class="icon-md me-3"></i>
                 <div>
-                    <h6 class="fw-bolder mb-1">Strict Binding Policy</h6>
-                    <p class="tx-12 mb-0">This system uses <strong>Strict Pair Binding</strong>. Once a domain or device UID
-                        is activated, it is PERMANENTLY locked to that license key. Revoking an activation does not release
-                        the pair for reuse on other licenses or different configurations.</p>
+                    <h6 class="fw-bolder mb-1">Dynamic Quota Policy</h6>
+                    <p class="tx-12 mb-0">Activations are counted dynamically based on <strong>Active</strong> pairs.
+                        Revoking an activation frees up the slot for a new domain or device. Revoked pairs can be
+                        re-activated without consuming additional permanent slots.</p>
                 </div>
             </div>
 
@@ -112,22 +112,22 @@
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
                     <div class="bg-dark p-3 rounded">
                         <pre class="mb-0"><code>function activate_license($key, $domain, $device_uid) {
-            $response = wp_remote_post('{{ url('/api/v1/license-pair/activate') }}', [
-                'headers' => [
-                    'X-API-Key' => 'YOUR_SECRET_KEY'
-                ],
-                'body' => [
-                    'license_key' => $key,
-                    'domain'      => $domain,
-                    'device_uid'  => $device_uid
-                ]
-            ]);
+                $response = wp_remote_post('{{ url('/api/v1/license-pair/activate') }}', [
+                    'headers' => [
+                        'X-API-Key' => 'YOUR_SECRET_KEY'
+                    ],
+                    'body' => [
+                        'license_key' => $key,
+                        'domain'      => $domain,
+                        'device_uid'  => $device_uid
+                    ]
+                ]);
 
-            if (is_wp_error($response)) return false;
+                if (is_wp_error($response)) return false;
 
-            $body = json_decode(wp_remote_retrieve_body($response), true);
-            return $body['success'] ?? false;
-        }</code></pre>
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                return $body['success'] ?? false;
+            }</code></pre>
                     </div>
                 </div>
             </section>
@@ -147,21 +147,21 @@
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
                     <div class="bg-dark p-3 rounded">
                         <pre class="mb-0"><code>function validate_license($key, $domain, $device_uid) {
-            $response = wp_remote_post('{{ url('/api/v1/license-pair/validate') }}', [
-                'headers' => [
-                    'X-API-Key' => 'YOUR_SECRET_KEY'
-                ],
-                'body' => [
-                    'license_key' => $key,
-                    'domain'      => $domain,
-                    'device_uid'  => $device_uid
-                ]
-            ]);
+                $response = wp_remote_post('{{ url('/api/v1/license-pair/validate') }}', [
+                    'headers' => [
+                        'X-API-Key' => 'YOUR_SECRET_KEY'
+                    ],
+                    'body' => [
+                        'license_key' => $key,
+                        'domain'      => $domain,
+                        'device_uid'  => $device_uid
+                    ]
+                ]);
 
-            $body = json_decode(wp_remote_retrieve_body($response), true);
+                $body = json_decode(wp_remote_retrieve_body($response), true);
 
-            return (isset($body['success']) && $body['success']);
-        }</code></pre>
+                return (isset($body['success']) && $body['success']);
+            }</code></pre>
                     </div>
                 </div>
             </section>
@@ -170,8 +170,8 @@
             <section id="revoke" class="card grid-margin stretch-card">
                 <div class="card-body">
                     <h6 class="card-title text-primary">Pair Revocation</h6>
-                    <p class="text-secondary tx-13 mb-3">Remotely revoke an active pair. Note: The pair remains locked and
-                        the activation slot is NOT refunded.</p>
+                    <p class="text-secondary tx-13 mb-3">Remotely revoke an active pair. **Note**: This frees up 1
+                        activation slot on the license, allowing for new activations.</p>
 
                     <div class="bg-dark rounded p-3 mb-4">
                         <code class="text-white text-uppercase">POST</code> <code

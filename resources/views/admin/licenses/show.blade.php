@@ -137,7 +137,7 @@
                                                     </div>
                                                     <form action="{{ route('admin.activations.revoke', $activation) }}"
                                                         method="POST"
-                                                        onsubmit="return confirm('Revoke this activation? Domain and Device UID will remain locked to this license.')">
+                                                        onsubmit="return confirm('Revoke this activation? This will free up 1 slot in your license quota.')">
                                                         @csrf
                                                         <button type="submit" class="btn btn-link text-danger p-0"
                                                             title="Revoke Pair">
@@ -155,7 +155,7 @@
 
                                         @if($license->activations->where('status', 'revoked')->count() > 0)
                                             <hr>
-                                            <h6 class="tx-11 text-muted text-uppercase mb-2">Revoked (Locked)</h6>
+                                            <h6 class="tx-11 text-muted text-uppercase mb-2">Revocation History</h6>
                                             @foreach($license->activations->where('status', 'revoked') as $revoked)
                                                 <div class="mb-2 opacity-50">
                                                     <small
