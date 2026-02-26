@@ -73,29 +73,49 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="card-title">Activity History (Pair Specific)</h6>
-                    <div id="content">
-                        <ul class="timeline">
+                    <h6 class="card-title mb-4">Activity History (Pair Specific)</h6>
+                    <div class="mt-2">
+                        <div class="activity-timeline">
                             @forelse($activation->license->logs as $log)
-                                <li class="event">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span class="fw-bold text-primary">{{ ucfirst($log->action) }}</span>
-                                        <small class="text-muted">{{ $log->created_at->format('M d, Y H:i:s') }}</small>
+                                <div class="timeline-item">
+                                    <div class="timeline-indicator">
+                                        <div class="dot {{ $log->action === 'revoke_pair' ? 'bg-danger' : 'bg-primary' }}">
+                                        </div>
+                                        <div class="line"></div>
                                     </div>
-                                    <p class="tx-13 mb-1">
-                                        Action performed by <span class="fw-semibold">{{ $log->user->name ?? 'System' }}</span>
-                                    </p>
-                                    <p class="text-secondary small">
-                                        <i data-lucide="monitor" class="icon-xs me-1"></i> IP: {{ $log->ip_address ?? 'N/A' }}
-                                    </p>
-                                </li>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span
+                                                class="badge {{ $log->action === 'revoke_pair' ? 'bg-danger' : 'bg-primary' }} bg-opacity-10 text-{{ $log->action === 'revoke_pair' ? 'danger' : 'primary' }} text-uppercase tx-10 fw-bolder px-2 py-1">
+                                                {{ str_replace('_', ' ', $log->action) }}
+                                            </span>
+                                            <span
+                                                class="text-secondary tx-11">{{ $log->created_at->format('M d, Y H:i:s') }}</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <div class="avatar avatar-xs">
+                                                <div class="avatar-title bg-light text-secondary rounded-circle">
+                                                    {{ strtoupper(substr($log->user->name ?? 'S', 0, 1)) }}
+                                                </div>
+                                            </div>
+                                            <p class="tx-13 mb-0">
+                                                Performed by <span
+                                                    class="fw-bold text-body">{{ $log->user->name ?? 'System' }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="d-flex align-items-center text-secondary tx-12 ps-1">
+                                            <i data-lucide="monitor" class="icon-xs me-2"></i>
+                                            <span>IP: {{ $log->ip_address ?? 'N/A' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
                             @empty
                                 <div class="text-center py-5">
                                     <i data-lucide="info" class="icon-lg text-secondary mb-2"></i>
                                     <p class="text-secondary">No activity logs found for this pair.</p>
                                 </div>
                             @endforelse
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -105,28 +125,80 @@
 
 @push('custom-styles')
     <style>
-        .timeline {
-            border-left: 2px solid #e9ecef;
-            padding-left: 20px;
-            list-style: none;
+        .activity-timeline {
+            padding-left: 10px;
         }
 
-        .timeline .event {
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            padding-bottom: 30px;
             position: relative;
-            padding-bottom: 25px;
         }
 
-        .timeline .event::before {
-            content: "";
-            position: absolute;
-            left: -27px;
-            top: 5px;
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 12px;
+        }
+
+        .timeline-indicator .dot {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #6571ff;
-            border: 2px solid #fff;
-            box-shadow: 0 0 0 2px #6571ff;
+            z-index: 2;
+            box-shadow: 0 0 0 3px rgba(101, 113, 255, 0.2);
+        }
+
+        .timeline-indicator .dot.bg-danger {
+            box-shadow: 0 0 0 3px rgba(255, 51, 102, 0.2);
+        }
+
+        .timeline-indicator .line {
+            flex-grow: 1;
+            width: 2px;
+            background-color: #e9ecef;
+            margin-top: 5px;
+            margin-bottom: -5px;
+        }
+
+        .timeline-item:last-child .timeline-indicator .line {
+            display: none;
+        }
+
+        .timeline-content {
+            flex-grow: 1;
+            padding: 15px;
+            background-color: rgba(248, 249, 250, 0.5);
+            border-radius: 8px;
+            border: 1px solid #f1f2f4;
+            transition: all 0.2s ease;
+        }
+
+        .timeline-content:hover {
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .avatar-xs {
+            width: 24px;
+            height: 24px;
+            font-size: 10px;
+        }
+
+        .avatar-title {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
         }
     </style>
 @endpush
