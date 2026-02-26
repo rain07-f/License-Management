@@ -1,25 +1,30 @@
-name: Deploy to VPS
+name: 🚀 Deploy License Management
 
 on:
   push:
     branches:
-      - main
+      - feature/license-generate
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Server
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: rain07-f
-          key: ${{ secrets.VPS_PRIVATE_KEY }}
+          host: ${{ secrets.VPS_DCT_HOST }}
+          username: dct-license
+          key: ${{ secrets.VPS_DCT_KEY }}
           script: |
-            cd /home/rain07-f/htdocs/l-manage.rain07.com/License-Management
-            git pull origin main
-            composer install --no-dev --optimize-autoloader
+            cd /home/dct-license/htdocs/license.dct.co.id/License-Management
+            git checkout feature/license-generate
+            git pull origin feature/license-generate
+            composer install --no-interaction --prefer-dist --optimize-autoloader
             php artisan migrate --force
-            php artisan optimize
-
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan config:cache
+            echo "🚀 Deploy selesai"
