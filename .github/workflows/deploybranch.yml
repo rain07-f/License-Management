@@ -17,9 +17,12 @@ jobs:
           username: dct-license
           key: ${{ secrets.VPS_DCT_KEY }}
           script: |
+            set -e
             cd /home/dct-license/htdocs/license.dct.co.id/License-Management
+            git fetch origin
             git checkout feature/license-generate
             git pull origin feature/license-generate
+            git clean -fd
             composer install --no-interaction --prefer-dist --optimize-autoloader
             php artisan migrate --force
             php artisan config:clear
