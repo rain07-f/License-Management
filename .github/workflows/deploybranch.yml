@@ -3,7 +3,7 @@ name: 🚀 Deploy License Management
 on:
   push:
     branches:
-      - feature/license-generate
+      - main
 
 jobs:
   deploy:
@@ -20,14 +20,12 @@ jobs:
             set -e
             cd /home/dct-license/htdocs/license.dct.co.id/License-Management
             git fetch origin
-            git checkout feature/license-generate
-            git reset --hard origin/feature/license-generate
+            git reset --hard origin/main
             git clean -fd
-            composer install --no-interaction --prefer-dist --optimize-autoloader
+            composer install --no-dev --optimize-autoloader
             php artisan migrate --force
-            php artisan config:clear
+            php artisan optimize
             php artisan cache:clear
             php artisan route:clear
             php artisan view:clear
             php artisan config:cache
-            echo "🚀 Deploy selesai"
