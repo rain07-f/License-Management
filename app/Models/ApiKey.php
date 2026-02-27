@@ -36,7 +36,7 @@ class ApiKey extends Model
      */
     public static function generate(): string
     {
-        $prefix = 'RAIN07-';
+        $prefix = 'K3Y-';
         $random = Str::random(32);
         return $prefix . strtoupper($random);
     }
