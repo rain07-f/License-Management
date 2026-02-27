@@ -17,8 +17,11 @@ jobs:
           username: rain07-f
           key: ${{ secrets.VPS_PRIVATE_KEY }}
           script: |
+            set -e
             cd /home/rain07-f/htdocs/l-manage.rain07.com/License-Management
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
             php artisan optimize
