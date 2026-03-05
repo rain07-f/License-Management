@@ -199,6 +199,7 @@
 
 @section('scripts')
     <script>
+<<<<<<< HEAD
         (function ($) {
 
             "use strict";
@@ -245,6 +246,26 @@
                 }
 
                 // Helper to build row HTML
+=======
+        function copyToClipboard(id) {
+            var copyText = document.getElementById(id);
+            if (!copyText) return;
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+            alert("API Key copied to clipboard!");
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            "use strict";
+            const $ = window.jQuery;
+            if (!$) {
+                console.error("jQuery is required but not loaded properly.");
+                return;
+            }
+
+            // Helper to build row HTML
+>>>>>>> 1b5aae3 (fix-reveal-key)
                 function buildApiKeyRow(key, isSuperAdmin) {
                     const fingerprint = key.key_hash.substring(0, 8) + '****' + key.key_hash.substring(key.key_hash.length - 8);
                     const statusBadge = key.is_active 
@@ -346,12 +367,20 @@
                                     <div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
                                         <div class="d-flex">
                                             <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
+<<<<<<< HEAD
                                             <div class="flex-grow-1">
+=======
+                                            <div>
+>>>>>>> 1b5aae3 (fix-reveal-key)
                                                 <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
                                                 <p class="text-dark small mb-2">Copy this key now. For security purposes, we will <strong>never show it again</strong>.</p>
                                                 <div class="input-group">
                                                     <input type="text" class="form-control bg-light fw-mono font-monospace" id="dynamicApiKey" value="${res.api_key}" readonly>
+<<<<<<< HEAD
                                                     <button class="btn btn-outline-primary" type="button" id="copyDynamicKeyBtn">
+=======
+                                                    <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('dynamicApiKey')">
+>>>>>>> 1b5aae3 (fix-reveal-key)
                                                         <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
                                                     </button>
                                                 </div>
@@ -361,10 +390,13 @@
                                 `;
                                 $('#apiKeyAlertArea').html(alertHtml);
                                 
+<<<<<<< HEAD
                                 document.getElementById('copyDynamicKeyBtn').addEventListener('click', function() {
                                     copyToClipboard('dynamicApiKey', this);
                                 });
 
+=======
+>>>>>>> 1b5aae3 (fix-reveal-key)
                                 const newRow = buildApiKeyRow(res.data, {{ Auth::user()->isSuperAdmin() ? 'true' : 'false' }});
                                 $('#apiKeysTableBody').prepend(newRow);
                                 if (window.lucide) lucide.createIcons();
@@ -420,6 +452,7 @@
                     }
                 });
 
+<<<<<<< HEAD
                 // Reveal logic
                 const revealModalEl = document.getElementById('revealKeyModal');
                 const revealModal = bootstrap.Modal.getOrCreateInstance(revealModalEl);
@@ -488,5 +521,71 @@
                 });
             });
         })(jQuery);
+=======
+                // Reveal logic (existing with minor adjustments for delegation)
+                const revealModalElement = document.getElementById('revealKeyModal');
+                if (revealModalElement) {
+                    const revealModal = new bootstrap.Modal(revealModalElement);
+                    const revealedInput = document.getElementById('revealedApiKey');
+                    const timerSpan = document.getElementById('revealTimer');
+                    const copyBtn = document.getElementById('copyRevealedKeyBtn');
+                    let countdownInterval;
+
+                    $(document).on('click', '.reveal-key-btn', function () {
+                        const keyId = this.dataset.id;
+                        $.ajax({
+                            url: `/admin/api-keys/${keyId}/reveal`,
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                            success: function(data) {
+                                if (data.success) {
+                                    revealedInput.value = data.key;
+                                    revealModal.show();
+                                    startCountdown();
+                                } else {
+                                    alert(data.message || 'Failed to reveal key');
+                                }
+                            }
+                        });
+                    });
+
+                    function startCountdown() {
+                        clearInterval(countdownInterval);
+                        let seconds = 30;
+                        timerSpan.textContent = seconds;
+                        countdownInterval = setInterval(() => {
+                            seconds--;
+                            timerSpan.textContent = seconds;
+                            if (seconds <= 0) {
+                                clearInterval(countdownInterval);
+                                revealModal.hide();
+                                revealedInput.value = '';
+                            }
+                        }, 1000);
+                    }
+
+                    if (copyBtn) {
+                        copyBtn.addEventListener('click', function () {
+                            revealedInput.select();
+                            revealedInput.setSelectionRange(0, 99999);
+                            document.execCommand("copy");
+                            const originalContent = this.innerHTML;
+                            this.innerHTML = '<i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> Copied!';
+                            this.classList.replace('btn-outline-primary', 'btn-success');
+                            setTimeout(() => {
+                                this.innerHTML = originalContent;
+                                this.classList.replace('btn-success', 'btn-outline-primary');
+                                if (window.lucide) lucide.createIcons();
+                            }, 2000);
+                        });
+                    }
+
+                    revealModalElement.addEventListener('hidden.bs.modal', function () {
+                        clearInterval(countdownInterval);
+                        revealedInput.value = '';
+                    });
+                }
+            });
+>>>>>>> 1b5aae3 (fix-reveal-key)
     </script>
 @endsection
