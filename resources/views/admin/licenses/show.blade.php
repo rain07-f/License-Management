@@ -1,5 +1,22 @@
 @extends('layouts.admin')
 
+@push('custom-styles')
+    <style>
+        .activity-history-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-history-scroll thead th {
+            position: sticky;
+            top: 0;
+            background-color: var(--bs-card-bg, #fff);
+            /* Fallback to white if variable not defined, though it's dark theme usually */
+            z-index: 10;
+        }
+    </style>
+@endpush
+
 @section('content')
     <nav class="page-breadcrumb">
         <ol class="breadcrumb">
@@ -85,36 +102,39 @@
                             </div>
 
                             <h6 class="card-title mt-4">Activity History</h6>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Timestamp</th>
-                                            <th>Action</th>
-                                            <th>User</th>
-                                            <th>Domain</th>
-                                            <th>IP Address</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($license->logs as $log)
+                            <div class="activity-history-scroll">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
                                             <tr>
-                                                <td class="tx-12">{{ $log->created_at->format('Y-m-d H:i') }}</td>
-                                                <td>
-                                                    <span
-                                                        class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $log->action }}</span>
-                                                </td>
-                                                <td class="tx-12">{{ $log->user->name ?? 'System' }}</td>
-                                                <td class="tx-12 fw-medium text-primary">{{ $log->domain ?? '-' }}</td>
-                                                <td class="font-monospace tx-11">{{ $log->ip_address ?? '-' }}</td>
+                                                <th>Timestamp</th>
+                                                <th>Action</th>
+                                                <th>User</th>
+                                                <th>Domain</th>
+                                                <th>IP Address</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center py-4 text-muted">No activity recorded.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($license->logs as $log)
+                                                <tr>
+                                                    <td class="tx-12">{{ $log->created_at->format('Y-m-d H:i') }}</td>
+                                                    <td>
+                                                        <span
+                                                            class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $log->action }}</span>
+                                                    </td>
+                                                    <td class="tx-12">{{ $log->user->name ?? 'System' }}</td>
+                                                    <td class="tx-12 fw-medium text-primary">{{ $log->domain ?? '-' }}</td>
+                                                    <td class="font-monospace tx-11">{{ $log->ip_address ?? '-' }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="text-center py-4 text-muted">No activity recorded.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
 
