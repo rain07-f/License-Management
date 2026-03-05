@@ -9,7 +9,7 @@ use App\Models\LicenseLog;
 
 class LogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $query = LicenseLog::with(['license', 'user']);
@@ -20,7 +20,21 @@ class LogController extends Controller
             });
         }
 
-        $logs = $query->latest()->paginate(20);
+        // Apply filters
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $logs = $query->latest()->paginate(20)->withQueryString();
+        
         return view('admin.logs.index', compact('logs'));
     }
 }

@@ -19,6 +19,60 @@
                         </div>
                     </div>
 
+                    <!-- Filters -->
+                    <div class="mb-4">
+                        <form action="{{ route('admin.logs.index') }}" method="GET" class="row g-3">
+                            <div class="col-12 col-md-3">
+                                <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Action</label>
+                                <select name="action" class="form-select form-select-sm shadow-none">
+                                    <option value="">All Actions</option>
+                                    @php
+                                        $actions = ['generate', 'activate', 'validate', 'renew', 'revoke', 'deactivate', 'reactivate', 'transfer'];
+                                    @endphp
+                                    @foreach($actions as $action)
+                                        <option value="{{ $action }}" {{ request('action') == $action ? 'selected' : '' }}>
+                                            {{ ucfirst($action) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date From</label>
+                                <div class="input-group datepicker-wrap">
+                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
+                                        <i data-lucide="calendar" class="icon-sm text-secondary"></i>
+                                    </span>
+                                    <input type="text" name="date_from" id="date_from" 
+                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" 
+                                        data-input
+                                        placeholder="YYYY-MM-DD" 
+                                        value="{{ request('date_from') }}">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date To</label>
+                                <div class="input-group datepicker-wrap">
+                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
+                                        <i data-lucide="calendar" class="icon-sm text-secondary"></i>
+                                    </span>
+                                    <input type="text" name="date_to" id="date_to" 
+                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" 
+                                        data-input
+                                        placeholder="YYYY-MM-DD" 
+                                        value="{{ request('date_to') }}">
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm flex-grow-1 px-3">
+                                    <i data-lucide="filter" class="icon-sm me-1"></i> Filter
+                                </button>
+                                <a href="{{ route('admin.logs.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+                                    <i data-lucide="refresh-cw" class="icon-sm me-1"></i> Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -36,8 +90,11 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <span
-                                                    class="fw-medium tx-12">{{ $log->created_at->format('Y-m-d H:i:s') }}</span>
+                                                <a href="{{ route('admin.logs.index', ['date_from' => $log->created_at->format('Y-m-d'), 'date_to' => $log->created_at->format('Y-m-d')]) }}" 
+                                                   class="fw-medium tx-12 text-light hover-primary" 
+                                                   title="Filter by this date">
+                                                    {{ $log->created_at->format('Y-m-d H:i:s') }}
+                                                </a>
                                                 <span
                                                     class="text-secondary tx-11">{{ $log->created_at->diffForHumans() }}</span>
                                             </div>
@@ -93,3 +150,22 @@
         </div>
     </div>
 @endsection
+
+@push('custom-scripts')
+    <script>
+        $(function() {
+            'use strict';
+
+            if ($('.datepicker-wrap').length) {
+                $('.datepicker-wrap').each(function() {
+                    flatpickr(this, {
+                        wrap: true,
+                        dateFormat: "Y-m-d",
+                        allowInput: true,
+                        disableMobile: "true"
+                    });
+                });
+            }
+        });
+    </script>
+@endpush
