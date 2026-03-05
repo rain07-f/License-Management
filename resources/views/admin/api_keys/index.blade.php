@@ -27,15 +27,15 @@
                         <div id="sessionApiKeyAlert" class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
                             <div class="d-flex">
                                 <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
-                                <div>
-                                    <p class="fw-bold text-light mb-1">New API Key Generated!</p>
-                                    <p class="text-lightgit small mb-2">Copy this key now. For security purposes, we will
+                                <div class="flex-grow-1">
+                                    <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
+                                    <p class="text-dark small mb-2">Copy this key now. For security purposes, we will
                                         <strong>never show it again</strong>.
                                     </p>
                                     <div class="input-group">
-                                        <input type="text" class="form-control bg-dark fw-mono font-monospace" id="newApiKey"
+                                        <input type="text" class="form-control bg-light fw-mono font-monospace" id="newApiKey"
                                             value="{{ session('api_key') }}" readonly>
-                                        <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('newApiKey')">
+                                        <button class="btn btn-outline-primary" type="button" id="copySessionKeyBtn">
                                             <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
                                         </button>
                                     </div>
@@ -181,7 +181,7 @@
                         For security, this key will be hidden automatically in <span id="revealTimer">30</span> seconds.
                     </div>
                     <div class="input-group">
-                        <input type="text" class="form-control bg-light fw-mono font-monospace" id="revealedApiKey"
+                        <input type="text" class="form-control bg-dark fw-mono font-monospace" id="revealedApiKey"
                             readonly>
                         <button class="btn btn-outline-primary" type="button" id="copyRevealedKeyBtn">
                             <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
@@ -195,246 +195,298 @@
         </div>
     </div>
 
+@endsection
+
+@section('scripts')
     <script>
-        function copyToClipboard(id) {
-            var copyText = document.getElementById(id);
-            copyText.select();
-            copyText.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-            alert("API Key copied to clipboard!");
-        }
+        (function ($) {
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Helper to build row HTML
-            function buildApiKeyRow(key, isSuperAdmin) {
-                const fingerprint = key.key_hash.substring(0, 8) + '****' + key.key_hash.substring(key.key_hash.length - 8);
-                const statusBadge = key.is_active 
-                    ? '<span class="badge bg-success-subtle text-success">Active</span>' 
-                    : '<span class="badge bg-danger-subtle text-danger">Inactive</span>';
-                
-                const createdAt = new Date(key.created_at).toLocaleString('en-US', {
-                    month: 'short', day: '2-digit', year: 'numeric', 
-                    hour: '2-digit', minute: '2-digit', hour12: false
-                }).replace(',', '');
+            "use strict";
 
-                let revealButton = '';
-                if (key.is_active && isSuperAdmin) {
-                    revealButton = `
-                        <li>
-                            <button type="button" class="dropdown-item py-2 reveal-key-btn" data-id="${key.id}">
-                                <i data-lucide="eye" class="me-2 icon-sm opacity-50"></i> Reveal Key
-                            </button>
-                        </li>
+            if (typeof jQuery === "undefined") {
+                console.error("jQuery not loaded");
+                return;
+            }
+
+            async function copyToClipboard(inputId, btnEl) {
+                const input = document.getElementById(inputId);
+                if (!input || !input.value) return;
+
+                try {
+                    await navigator.clipboard.writeText(input.value);
+                    
+                    const originalContent = btnEl.innerHTML;
+                    const originalClass = btnEl.className;
+                    
+                    btnEl.innerHTML = '<i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> Copied!';
+                    btnEl.classList.remove('btn-outline-primary');
+                    btnEl.classList.add('btn-success');
+                    
+                    if (window.lucide) lucide.createIcons();
+
+                    setTimeout(() => {
+                        btnEl.innerHTML = originalContent;
+                        btnEl.className = originalClass;
+                        if (window.lucide) lucide.createIcons();
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard');
+                }
+            }
+
+            $(function() {
+                // Session Copy
+                const sessionCopyBtn = document.getElementById('copySessionKeyBtn');
+                if (sessionCopyBtn) {
+                    sessionCopyBtn.addEventListener('click', function() {
+                        copyToClipboard('newApiKey', this);
+                    });
+                }
+
+                // Helper to build row HTML
+                function buildApiKeyRow(key, isSuperAdmin) {
+                    const fingerprint = key.key_hash.substring(0, 8) + '****' + key.key_hash.substring(key.key_hash.length - 8);
+                    const statusBadge = key.is_active 
+                        ? '<span class="badge bg-success-subtle text-success">Active</span>' 
+                        : '<span class="badge bg-danger-subtle text-danger">Inactive</span>';
+                    
+                    const createdAt = new Date(key.created_at).toLocaleString('en-US', {
+                        month: 'short', day: '2-digit', year: 'numeric', 
+                        hour: '2-digit', minute: '2-digit', hour12: false
+                    }).replace(',', '');
+
+                    let revealButton = '';
+                    if (key.is_active && isSuperAdmin) {
+                        revealButton = `
+                            <li>
+                                <button type="button" class="dropdown-item py-2 reveal-key-btn" data-id="${key.id}">
+                                    <i data-lucide="eye" class="me-2 icon-sm opacity-50"></i> Reveal Key
+                                </button>
+                            </li>
+                        `;
+                    }
+
+                    const statusAction = key.is_active
+                        ? `
+                            <li>
+                                <form class="apiKeyFormAction" action="/admin/api-keys/${key.id}" method="POST">
+                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="dropdown-item py-2 text-warning">
+                                        <i data-lucide="shield-off" class="me-2 icon-sm opacity-50"></i> Deactivate
+                                    </button>
+                                </form>
+                            </li>
+                        `
+                        : `
+                            <li>
+                                <form class="apiKeyFormAction" action="/admin/api-keys/${key.id}/activate" method="POST">
+                                    <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                    <button type="submit" class="dropdown-item py-2 text-success">
+                                        <i data-lucide="shield-check" class="me-2 icon-sm opacity-50"></i> Reactivate
+                                    </button>
+                                </form>
+                            </li>
+                        `;
+
+                    return `
+                        <tr id="apiKeyRow-${key.id}">
+                            <td><div class="fw-bold text-primary">${key.name}</div></td>
+                            <td><code class="text-muted small">${fingerprint}</code></td>
+                            <td>${statusBadge}</td>
+                            <td>${createdAt}</td>
+                            <td class="px-4 py-3 text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                        type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                        Action
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                        ${revealButton}
+                                        ${statusAction}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form class="apiKeyFormDelete" action="/admin/api-keys/${key.id}/permanent" method="POST">
+                                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                                    <i data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
                     `;
                 }
 
-                const statusAction = key.is_active
-                    ? `
-                        <li>
-                            <form class="apiKeyFormAction" action="/admin/api-keys/${key.id}" method="POST">
-                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="dropdown-item py-2 text-warning">
-                                    <i data-lucide="shield-off" class="me-2 icon-sm opacity-50"></i> Deactivate
-                                </button>
-                            </form>
-                        </li>
-                    `
-                    : `
-                        <li>
-                            <form class="apiKeyFormAction" action="/admin/api-keys/${key.id}/activate" method="POST">
-                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                <button type="submit" class="dropdown-item py-2 text-success">
-                                    <i data-lucide="shield-check" class="me-2 icon-sm opacity-50"></i> Reactivate
-                                </button>
-                            </form>
-                        </li>
-                    `;
+                // AJAX Create
+                $(document).off('submit', '#createApiKeyForm').on('submit', '#createApiKeyForm', function(e) {
+                    e.preventDefault();
+                    let form = $(this);
+                    let btn = form.find('button[type=submit]');
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('generateKeyModal'));
 
-                return `
-                    <tr id="apiKeyRow-${key.id}">
-                        <td><div class="fw-bold text-primary">${key.name}</div></td>
-                        <td><code class="text-muted small">${fingerprint}</code></td>
-                        <td>${statusBadge}</td>
-                        <td>${createdAt}</td>
-                        <td class="px-4 py-3 text-end">
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
-                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                    Action
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
-                                    ${revealButton}
-                                    ${statusAction}
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <form class="apiKeyFormDelete" action="/admin/api-keys/${key.id}/permanent" method="POST">
-                                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="dropdown-item py-2 text-danger">
-                                                <i data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
-
-            // AJAX Create
-            $(document).off('submit', '#createApiKeyForm').on('submit', '#createApiKeyForm', function(e) {
-                e.preventDefault();
-                let form = $(this);
-                let btn = form.find('button[type=submit]');
-                let modal = bootstrap.Modal.getInstance(document.getElementById('generateKeyModal'));
-
-                $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
-                    data: form.serialize(),
-                    beforeSend: function() {
-                        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Generating...');
-                    },
-                    success: function(res) {
-                        if(res.success) {
-                            form[0].reset();
-                            modal.hide();
-                            $('#sessionApiKeyAlert').remove();
-                            
-                            const alertHtml = `
-                                <div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
-                                    <div class="d-flex">
-                                        <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
-                                        <div>
-                                            <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
-                                            <p class="text-dark small mb-2">Copy this key now. For security purposes, we will <strong>never show it again</strong>.</p>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control bg-light fw-mono font-monospace" id="dynamicApiKey" value="${res.api_key}" readonly>
-                                                <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('dynamicApiKey')">
-                                                    <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
-                                                </button>
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize(),
+                        beforeSend: function() {
+                            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Generating...');
+                        },
+                        success: function(res) {
+                            if(res.success) {
+                                form[0].reset();
+                                modal.hide();
+                                $('#sessionApiKeyAlert').remove();
+                                
+                                const alertHtml = `
+                                    <div class="alert alert-warning border-start border-4 border-warning shadow-sm mb-4">
+                                        <div class="d-flex">
+                                            <div class="py-1"><i data-lucide="alert-triangle" class="text-warning me-2"></i></div>
+                                            <div class="flex-grow-1">
+                                                <p class="fw-bold text-dark mb-1">New API Key Generated!</p>
+                                                <p class="text-dark small mb-2">Copy this key now. For security purposes, we will <strong>never show it again</strong>.</p>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control bg-light fw-mono font-monospace" id="dynamicApiKey" value="${res.api_key}" readonly>
+                                                    <button class="btn btn-outline-primary" type="button" id="copyDynamicKeyBtn">
+                                                        <i data-lucide="copy" class="me-1" style="width: 14px; height: 14px;"></i> Copy
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            `;
-                            $('#apiKeyAlertArea').html(alertHtml);
-                            
-                            const newRow = buildApiKeyRow(res.data, {{ Auth::user()->isSuperAdmin() ? 'true' : 'false' }});
-                            $('#apiKeysTableBody').prepend(newRow);
-                            if (window.lucide) lucide.createIcons();
+                                `;
+                                $('#apiKeyAlertArea').html(alertHtml);
+                                
+                                document.getElementById('copyDynamicKeyBtn').addEventListener('click', function() {
+                                    copyToClipboard('dynamicApiKey', this);
+                                });
+
+                                const newRow = buildApiKeyRow(res.data, {{ Auth::user()->isSuperAdmin() ? 'true' : 'false' }});
+                                $('#apiKeysTableBody').prepend(newRow);
+                                if (window.lucide) lucide.createIcons();
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Failed to generate API Key');
+                            console.error(xhr.responseText);
+                        },
+                        complete: function() {
+                            btn.prop('disabled', false).text('Generate Key');
                         }
-                    },
-                    error: function(xhr) {
-                        alert('Failed to generate API Key');
-                        console.error(xhr.responseText);
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('Generate Key');
-                    }
+                    });
                 });
-            });
 
-            // AJAX Status Toggle
-            $(document).off('submit', '.apiKeyFormAction').on('submit', '.apiKeyFormAction', function(e) {
-                e.preventDefault();
-                let form = $(this);
-                let row = form.closest('tr');
+                // AJAX Status Toggle
+                $(document).off('submit', '.apiKeyFormAction').on('submit', '.apiKeyFormAction', function(e) {
+                    e.preventDefault();
+                    let form = $(this);
+                    let row = form.closest('tr');
 
-                $.ajax({
-                    url: form.attr('action'),
-                    method: 'POST',
-                    data: form.serialize(),
-                    success: function(res) {
-                        if(res.success) {
-                            const updatedRow = buildApiKeyRow(res.data, {{ Auth::user()->isSuperAdmin() ? 'true' : 'false' }});
-                            row.replaceWith(updatedRow);
-                            if (window.lucide) lucide.createIcons();
-                        }
-                    }
-                });
-            });
-
-            // AJAX Delete
-            $(document).off('submit', '.apiKeyFormDelete').on('submit', '.apiKeyFormDelete', function(e) {
-                e.preventDefault();
-                let form = $(this);
-                let row = form.closest('tr');
-
-                if(confirm('Are you sure you want to permanently delete this API key? This action cannot be undone.')) {
                     $.ajax({
                         url: form.attr('action'),
                         method: 'POST',
                         data: form.serialize(),
                         success: function(res) {
                             if(res.success) {
-                                row.fadeOut(300, function() { $(this).remove(); });
+                                const updatedRow = buildApiKeyRow(res.data, {{ Auth::user()->isSuperAdmin() ? 'true' : 'false' }});
+                                row.replaceWith(updatedRow);
+                                if (window.lucide) lucide.createIcons();
                             }
                         }
                     });
-                }
-            });
+                });
 
-            // Reveal logic (existing with minor adjustments for delegation)
-            const revealModal = new bootstrap.Modal(document.getElementById('revealKeyModal'));
-            const revealedInput = document.getElementById('revealedApiKey');
-            const timerSpan = document.getElementById('revealTimer');
-            const copyBtn = document.getElementById('copyRevealedKeyBtn');
-            let countdownInterval;
+                // AJAX Delete
+                $(document).off('submit', '.apiKeyFormDelete').on('submit', '.apiKeyFormDelete', function(e) {
+                    e.preventDefault();
+                    let form = $(this);
+                    let row = form.closest('tr');
 
-            $(document).on('click', '.reveal-key-btn', function () {
-                const keyId = this.dataset.id;
-                $.ajax({
-                    url: `/admin/api-keys/${keyId}/reveal`,
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                    success: function(data) {
-                        if (data.success) {
-                            revealedInput.value = data.key;
-                            revealModal.show();
-                            startCountdown();
-                        } else {
-                            alert(data.message || 'Failed to reveal key');
-                        }
+                    if(confirm('Are you sure you want to permanently delete this API key? This action cannot be undone.')) {
+                        $.ajax({
+                            url: form.attr('action'),
+                            method: 'POST',
+                            data: form.serialize(),
+                            success: function(res) {
+                                if(res.success) {
+                                    row.fadeOut(300, function() { $(this).remove(); });
+                                }
+                            }
+                        });
                     }
                 });
-            });
 
-            function startCountdown() {
-                clearInterval(countdownInterval);
-                let seconds = 30;
-                timerSpan.textContent = seconds;
-                countdownInterval = setInterval(() => {
-                    seconds--;
-                    timerSpan.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(countdownInterval);
-                        revealModal.hide();
-                        revealedInput.value = '';
-                    }
-                }, 1000);
-            }
+                // Reveal logic
+                const revealModalEl = document.getElementById('revealKeyModal');
+                const revealModal = bootstrap.Modal.getOrCreateInstance(revealModalEl);
+                const revealedInput = document.getElementById('revealedApiKey');
+                const timerSpan = document.getElementById('revealTimer');
+                const copyBtn = document.getElementById('copyRevealedKeyBtn');
+                let countdownInterval = null;
 
-            copyBtn.addEventListener('click', function () {
-                revealedInput.select();
-                revealedInput.setSelectionRange(0, 99999);
-                document.execCommand("copy");
-                const originalContent = this.innerHTML;
-                this.innerHTML = '<i data-lucide="check" class="me-1" style="width: 14px; height: 14px;"></i> Copied!';
-                this.classList.replace('btn-outline-primary', 'btn-success');
-                setTimeout(() => {
-                    this.innerHTML = originalContent;
-                    this.classList.replace('btn-success', 'btn-outline-primary');
-                    if (window.lucide) lucide.createIcons();
-                }, 2000);
-            });
+                $(document).on('click', '.reveal-key-btn', function () {
+                    const btn = $(this);
+                    const keyId = btn.data('id');
+                    if (!keyId) return;
 
-            document.getElementById('revealKeyModal').addEventListener('hidden.bs.modal', function () {
-                clearInterval(countdownInterval);
-                revealedInput.value = '';
+                    btn.prop('disabled', true);
+
+                    $.ajax({
+                        url: `/admin/api-keys/${keyId}/reveal`,
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(data) {
+                            if (data && data.success) {
+                                revealedInput.value = data.key || '';
+                                revealModal.show();
+                                startCountdown(30);
+                            } else {
+                                alert(data.message || 'Failed to reveal key');
+                            }
+                        },
+                        error: function () {
+                            alert('Server error while revealing key');
+                        },
+                        complete: function () {
+                            btn.prop('disabled', false);
+                        }
+                    });
+                });
+
+                function startCountdown(seconds = 30) {
+                    clearInterval(countdownInterval);
+                    let timeLeft = seconds;
+                    timerSpan.textContent = timeLeft;
+
+                    countdownInterval = setInterval(() => {
+                        timeLeft--;
+                        timerSpan.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(countdownInterval);
+                            revealedInput.value = '';
+                            revealModal.hide();
+                        }
+                    }, 1000);
+                }
+
+               if (copyBtn) {
+                    copyBtn.addEventListener('click', function () {
+                        copyToClipboard('revealedApiKey', this);
+                    });
+                }
+
+                revealModalEl.addEventListener('hidden.bs.modal', function(){
+                    clearInterval(countdownInterval);
+                    revealedInput.value = '';
+                    timerSpan.textContent = 30;
+                });
             });
-        });
+        })(jQuery);
     </script>
 @endsection
