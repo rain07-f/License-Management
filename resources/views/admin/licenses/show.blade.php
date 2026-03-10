@@ -75,7 +75,7 @@
                             <div class="row g-4 mb-5">
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Plan</label>
-                                    <span class="fw-bold">{{ $license->plan->name }}</span>
+                                    <span id="planNameDisplay" class="fw-bold">{{ $license->plan->name }}</span>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Owner</label>
@@ -88,7 +88,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Expires At</label>
-                                    <span
+                                    <span id="expiresAtBadge"
                                         class="fw-bold {{ $license->expires_at && $license->expires_at->isPast() ? 'text-danger' : 'text-success' }}">
                                         {{ $license->expires_at ? $license->expires_at->format('M d, Y') : 'Never' }}
                                     </span>
@@ -183,7 +183,7 @@
         <div class="modal fade" id="renewModal" tabindex="-1" aria-labelledby="renewModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="{{ route('admin.licenses.renew', $license) }}" method="POST">
+                    <form id="renewLicenseForm" action="{{ route('admin.licenses.renew', $license) }}" method="POST">
                         @csrf
                         <div class="modal-header">
                             <h5 class="modal-title" id="renewModalLabel">Renew License</h5>
@@ -283,6 +283,43 @@
                     error: function (xhr) {
                         btn.prop('disabled', false).html(originalHtml);
                         alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Failed to deactivate domain.'));
+                    }
+                });
+            // Handle AJAX Renewal
+            $(document).on('submit', '#renewLicenseForm', function (e) {
+                e.preventDefault();
+                const form = $(this);
+                const btn = form.find('button[type="submit"]');
+                const modalEl = document.getElementById('renewModal');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    beforeSend: function () {
+                        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Reviewing...');
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            modal.hide();
+                            
+                            // Update UI
+                            const expiresAt = new Date(res.data.expires_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                            $('#expiresAtBadge').text(expiresAt).removeClass('text-danger').addClass('text-success');
+                            $('#planNameDisplay').text(res.data.plan.name);
+                            
+                            // Reload domains and history to show the renewal action
+                            loadDomains('{{ route("admin.licenses.domains", $license) }}');
+                            
+                            // Optional: Refresh the activity history if needed
+                            // For simplicity, we can just reload the current page or partial
+                            location.reload(); // Simple reload for history for now, or we could AJAX-ify it too
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false).text('Renew Now');
+                        alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Failed to renew license.'));
                     }
                 });
             });

@@ -61,10 +61,23 @@
                 -webkit-overflow-scrolling: touch;
             }
         }
+        
+        /* Sidebar toggle transition */
+        .sidebar {
+            transition: width 0.3s ease, left 0.3s ease;
+        }
+        .page-wrapper {
+            transition: margin-left 0.3s ease;
+        }
     </style>
 </head>
 
-<body>
+<body class="">
+    <script>
+        if (localStorage.getItem('sidebar-folded') === 'true' && window.innerWidth >= 992) {
+            document.body.classList.add('sidebar-folded');
+        }
+    </script>
     <script>
         var splash = document.createElement("div");
         splash.innerHTML = `
@@ -127,9 +140,38 @@
     @yield('scripts')
 
     <script>
-        if (window.lucide) {
-            lucide.createIcons();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar toggle logic
+            const body = document.body;
+            const sidebarTogglers = document.querySelectorAll('.sidebar-toggler');
+            
+            // Initial state from localStorage
+            if (localStorage.getItem('sidebar-folded') === 'true' && window.innerWidth >= 992) {
+                body.classList.add('sidebar-folded');
+                // Set togglers to active state if needed (for sidebar header toggler)
+                document.querySelectorAll('.sidebar-header .sidebar-toggler').forEach(t => t.classList.add('active'));
+            }
+
+            sidebarTogglers.forEach(toggler => {
+                toggler.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (window.innerWidth >= 992) {
+                        // Desktop: narrow/folded sidebar
+                        body.classList.toggle('sidebar-folded');
+                        this.classList.toggle('active');
+                        localStorage.setItem('sidebar-folded', body.classList.contains('sidebar-folded'));
+                    } else {
+                        // Mobile: show/hide sidebar
+                        body.classList.toggle('sidebar-open');
+                        this.classList.toggle('active');
+                    }
+                });
+            });
+
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
     </script>
 </body>
 

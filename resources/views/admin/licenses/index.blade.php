@@ -24,36 +24,16 @@
             </div>
             <div class="col-12 col-md-3 col-lg-3 text-center text-lg-end">
                 <a href="{{ route('admin.licenses.export') }}" class="btn btn-light rounded-pill px-3 border shadow-sm me-1" title="Export">
-                    <i data-lucide="download" class="icon-sm"></i>
+                    <i data-lucide="download" class="icon-sm" ></i> Export
                 </a>
                 @if(auth()->user()->role !== 'client')
                     <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickGenerateModal" title="Quick Generate">
-                        <i data-lucide="zap" class="icon-sm"></i>
+                        <i data-lucide="zap" class="icon-sm"></i> Add
                     </button>
-                    <a href="{{ route('admin.licenses.create') }}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm ms-1" title="Full Form">
-                        <i data-lucide="plus" class="icon-sm"></i>
-                    </a>
                 @endif
             </div>
         </div>
 
-        <div class="row mb-4 g-2">
-            <div class="col-12 col-md-3">
-                <select name="plan_id" class="form-select rounded-pill border-0 shadow-sm ps-3" onchange="this.form.submit()">
-                    <option value="">All Plans</option>
-                    @foreach($plans as $plan)
-                        <option value="{{ $plan->id }}" {{ request('plan_id') == $plan->id ? 'selected' : '' }}>{{ $plan->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            @if(request()->filled('search') || request()->filled('status') || request()->filled('plan_id'))
-                <div class="col-12 col-md-auto">
-                    <a href="{{ route('admin.licenses.index') }}" class="btn btn-light rounded-pill px-4 shadow-sm">
-                        <i data-lucide="x" class="me-1 icon-sm"></i> Clear Filters
-                    </a>
-                </div>
-            @endif
-        </div>
     </form>
 
     <div class="card border-0 shadow-sm">
