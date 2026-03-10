@@ -37,6 +37,7 @@ Route::middleware(['auth', 'login.cache'])->prefix('admin')->name('admin.')->gro
         Route::post('/licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
         Route::post('/licenses/{license}/upgrade', [LicenseController::class, 'upgradePlan'])->name('licenses.upgrade');
+        Route::get('/licenses/{license}/domains', [LicenseController::class, 'domains'])->name('licenses.domains');
     });
 
     Route::resource('licenses', LicenseController::class)->only(['index', 'show']);

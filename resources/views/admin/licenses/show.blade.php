@@ -96,7 +96,7 @@
                                 <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Activation
                                         Status</label>
-                                    <span class="fw-bold">{{ $license->domains->count() }} / {{ $license->max_domains }}
+                                    <span id="domainCount" class="fw-bold">{{ $license->domains()->count() }} / {{ $license->max_domains }}
                                         Domains Used</span>
                                 </div>
                                 <div class="col-md-4">
@@ -110,38 +110,11 @@
                                 <i data-lucide="globe" class="icon-sm me-2 text-primary"></i>
                                 Activated Domains
                             </h6>
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th>Domain Name</th>
-                                            <th>Activated At</th>
-                                            <th class="text-end">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($license->domains as $domain)
-                                            <tr>
-                                                <td class="fw-semibold">{{ $domain->domain_name }}</td>
-                                                <td class="tx-12 text-muted">{{ $domain->activated_at->format('M d, Y H:i') }}</td>
-                                                <td class="text-end">
-                                                    <form action="{{ route('admin.domains.destroy', $domain) }}" method="POST"
-                                                        onsubmit="return confirm('Deactivate this domain?')">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger btn-xs"
-                                                            title="Deactivate">
-                                                            <i data-lucide="minus-circle" class="icon-xs me-1"></i> Deactivate
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="3" class="text-center py-4 text-muted">No active domains found.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                            <div id="domainsContainer">
+                                @php
+                                    $domains = $license->domains()->latest()->paginate(5);
+                                @endphp
+                                @include('admin.licenses.partials._domains_table', ['license' => $license, 'domains' => $domains])
                             </div>
                         </div>
 
@@ -246,7 +219,73 @@
     <script>
         $(function () {
             'use strict';
-            // Modal and Luicide are handled by the main layout scripts
+            
+            // Handle AJAX Pagination for Domains
+            $(document).on('click', '#domainsPagination a', function (e) {
+                e.preventDefault();
+                let url = $(this).attr('href');
+                loadDomains(url);
+            });
+
+            function loadDomains(url) {
+                const container = $('#domainsContainer');
+                container.css('opacity', '0.5');
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (res) {
+                        // Support both raw HTML (old) and JSON (new) for robustness
+                        const html = typeof res === 'string' ? res : res.html;
+                        container.html(html).css('opacity', '1');
+                        
+                        if (res.count !== undefined) {
+                            $('#domainCount').text(`${res.count} / ${res.max} Domains Used`);
+                        }
+                        
+                        if (window.lucide) lucide.createIcons();
+                    },
+                    error: function () {
+                        container.css('opacity', '1');
+                        alert('Failed to load domains.');
+                    }
+                });
+            }
+
+            // Handle AJAX Deactivation
+            $(document).on('submit', '.deactivate-domain-form', function (e) {
+                e.preventDefault();
+                if (!confirm('Deactivate this domain?')) return;
+
+                const form = $(this);
+                const row = form.closest('tr');
+                const btn = form.find('button');
+                const originalHtml = btn.html();
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    beforeSend: function () {
+                        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            // Reload current page of domains to keep pagination accurate
+                            const currentPageUrl = $('#domainsPagination .active .page-link').attr('href') || '{{ route("admin.licenses.domains", $license) }}';
+                            loadDomains(currentPageUrl);
+                            
+                            // Also update the domain count in the UI if possible
+                            // The easiest way is to refresh the page or update just that part
+                            // For now, let's assume the user is okay with the table updating
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Failed to deactivate domain.'));
+                    }
+                });
+            });
         });
     </script>
 @endsection

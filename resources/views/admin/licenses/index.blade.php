@@ -256,7 +256,7 @@
             <div class="modal-content border-0 shadow">
                 <form id="upgradePlanForm">
                     @csrf
-                    <div class="modal-header border-0 bg-light">
+                    <div class="modal-header border-0 bg-dark">
                         <h5 class="modal-title fw-bold">Upgrade License Plan</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>

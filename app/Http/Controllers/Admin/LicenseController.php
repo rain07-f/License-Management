@@ -234,10 +234,24 @@ class LicenseController extends Controller
             'max_domains' => $plan->domain_limit,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan upgraded successfully.',
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
+            ]);
+        }
+
+        return back()->with('success', 'Plan upgraded successfully.');
+    }
+
+    public function domains(License $license)
+    {
+        $domains = $license->domains()->latest()->paginate(5);
         return response()->json([
-            'success' => true,
-            'message' => 'License plan updated successfully',
-            'data' => $license->refresh()->load(['owner', 'plan', 'generator', 'domains'])
+            'html' => view('admin.licenses.partials._domains_table', compact('license', 'domains'))->render(),
+            'count' => $license->domains()->count(),
+            'max' => $license->max_domains
         ]);
     }
 }
