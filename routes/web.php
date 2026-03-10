@@ -22,7 +22,7 @@ Route::middleware(\Illuminate\Routing\Middleware\ThrottleRequests::with(10, 1))-
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Basic Auth for all roles
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'login.cache'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api-docs', function () {
         return view('admin.api_docs');
@@ -36,6 +36,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/licenses/{license}/assign', [LicenseController::class, 'assign'])->name('licenses.assign');
         Route::post('/licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
+        Route::post('/licenses/{license}/upgrade', [LicenseController::class, 'upgradePlan'])->name('licenses.upgrade');
     });
 
     Route::resource('licenses', LicenseController::class)->only(['index', 'show']);
@@ -70,4 +71,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::post('/profile/sessions/revoke-all', [ProfileController::class, 'revokeAllOtherSessions'])->name('profile.sessions.revoke_all');
+    Route::post('/profile/sessions/{sessionId}/revoke', [ProfileController::class, 'revokeSession'])->name('profile.sessions.revoke');
+
+
 });

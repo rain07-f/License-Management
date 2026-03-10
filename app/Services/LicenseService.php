@@ -99,6 +99,7 @@ class LicenseService
 
             $license->update([
                 'plan_id' => $plan->id,
+                'max_domains' => $plan->domain_limit,
                 'expires_at' => $newExpiration,
                 'status' => 'active', // Reactivate if expired/revoked
             ]);

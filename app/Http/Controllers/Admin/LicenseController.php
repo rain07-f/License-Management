@@ -42,6 +42,14 @@ class LicenseController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('plan_id')) {
+            $query->where('plan_id', $request->plan_id);
+        }
+
         $licenses = $query->latest()->paginate(10)->withQueryString();
         $plans = Plan::all();
         $clients = [];
@@ -125,7 +133,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License generated successfully.',
-                    'data' => $license->load(['owner', 'plan', 'generator']),
+                    'data' => $license->load(['owner', 'plan', 'generator', 'domains']),
                     'display_key' => $license->license_key_display
                 ]);
             }
@@ -151,7 +159,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License assigned to client successfully.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
             ]);
         }
 
@@ -181,7 +189,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License revoked.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
             ]);
         }
 
@@ -200,7 +208,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License renewed successfully.',
-                    'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+                    'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
                 ]);
             }
 
@@ -211,5 +219,25 @@ class LicenseController extends Controller
             }
             return back()->with('error', $e->getMessage());
         }
+    }
+
+    public function upgradePlan(Request $request, License $license)
+    {
+        $request->validate([
+            'plan_id' => ['required', 'exists:plans,id']
+        ]);
+
+        $plan = Plan::find($request->plan_id);
+
+        $license->update([
+            'plan_id' => $plan->id,
+            'max_domains' => $plan->domain_limit,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'License plan updated successfully',
+            'data' => $license->refresh()->load(['owner', 'plan', 'generator', 'domains'])
+        ]);
     }
 }

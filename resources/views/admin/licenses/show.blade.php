@@ -3,16 +3,21 @@
 @push('custom-styles')
     <style>
         .activity-history-scroll {
-            max-height: 400px;
+            height: 400px;
             overflow-y: auto;
+            border-bottom: 1px solid var(--bs-border-color, #e9ecef);
+        }
+
+        .activity-history-scroll table {
+            margin-bottom: 0;
         }
 
         .activity-history-scroll thead th {
             position: sticky;
             top: 0;
-            background-color: var(--bs-card-bg, #fff);
-            /* Fallback to white if variable not defined, though it's dark theme usually */
+            background-color: var(--bs-card-bg, #040914);
             z-index: 10;
+            box-shadow: 0 1px 0 var(--bs-border-color, #e9ecef);
         }
     </style>
 @endpush
@@ -52,7 +57,7 @@
                         <div class="col-md-9">
                             <div class="bg-dark p-4 rounded mb-4 text-center">
                                 <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">License Key</label>
-                                <h3 class="text-primary fw-bolder text-break">{{ $license->license_key_display }}</h3>
+                                <h4 class="text-primary fw-bolder text-break">{{ $license->license_key_display }}</h4>
                                 <div class="mt-2 text-center">
                                     @php
                                         $statusBadge = [
@@ -101,75 +106,46 @@
                                 </div>
                             </div>
 
-                            <h6 class="card-title mt-4">Activity History</h6>
-                            <div class="activity-history-scroll">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
+                            <h6 class="card-title mt-4 d-flex align-items-center">
+                                <i data-lucide="globe" class="icon-sm me-2 text-primary"></i>
+                                Activated Domains
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Domain Name</th>
+                                            <th>Activated At</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($license->domains as $domain)
                                             <tr>
-                                                <th>Timestamp</th>
-                                                <th>Action</th>
-                                                <th>User</th>
-                                                <th>Domain</th>
-                                                <th>IP Address</th>
+                                                <td class="fw-semibold">{{ $domain->domain_name }}</td>
+                                                <td class="tx-12 text-muted">{{ $domain->activated_at->format('M d, Y H:i') }}</td>
+                                                <td class="text-end">
+                                                    <form action="{{ route('admin.domains.destroy', $domain) }}" method="POST"
+                                                        onsubmit="return confirm('Deactivate this domain?')">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-xs"
+                                                            title="Deactivate">
+                                                            <i data-lucide="minus-circle" class="icon-xs me-1"></i> Deactivate
+                                                        </button>
+                                                    </form>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($license->logs as $log)
-                                                <tr>
-                                                    <td class="tx-12">{{ $log->created_at->format('Y-m-d H:i') }}</td>
-                                                    <td>
-                                                        <span
-                                                            class="badge bg-dark text-white fw-bold rounded-pill px-3">{{ $log->action }}</span>
-                                                    </td>
-                                                    <td class="tx-12">{{ $log->user->name ?? 'System' }}</td>
-                                                    <td class="tx-12 fw-medium text-primary">{{ $log->domain ?? '-' }}</td>
-                                                    <td class="font-monospace tx-11">{{ $log->ip_address ?? '-' }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="text-center py-4 text-muted">No activity recorded.
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4 text-muted">No active domains found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <div class="col-md-3">
-                            <div class="card border mb-3">
-                                <div class="card-body">
-                                    <h6 class="card-title tx-13 mb-3 d-flex align-items-center">
-                                        <i data-lucide="globe" class="icon-sm me-2 text-primary"></i>
-                                        Activated Domains
-                                    </h6>
-                                    <div class="list-group list-group-flush">
-                                        @forelse($license->domains as $domain)
-                                            <div
-                                                class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 border-0">
-                                                <div>
-                                                    <p class="mb-0 fw-semibold tx-13">{{ $domain->domain_name }}</p>
-                                                    <small
-                                                        class="text-muted tx-11">{{ $domain->activated_at->format('M d, Y') }}</small>
-                                                </div>
-                                                <form action="{{ route('admin.domains.destroy', $domain) }}" method="POST"
-                                                    onsubmit="return confirm('Deactivate this domain?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="btn btn-link text-danger p-0"
-                                                        title="Deactivate">
-                                                        <i data-lucide="minus-circle" class="icon-sm"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        @empty
-                                            <p class="tx-12 text-muted text-center py-3">No active domains found.</p>
-                                        @endforelse
-                                    </div>
-                                </div>
-                            </div>
-
                             @if(auth()->user()->role !== 'client' && $license->status !== 'revoked')
                                 <div class="card border border-danger">
                                     <div class="card-body p-3">
@@ -184,6 +160,44 @@
                                     </div>
                                 </div>
                             @endif
+                            <div> &nbsp;</div>
+                            <div class="card border mb-3">
+                                <div class="card-body p-3">
+                                    <h6 class="card-title tx-13 mb-3 d-flex align-items-center">
+                                        <i data-lucide="history" class="icon-sm me-2 text-primary"></i>
+                                        Activity History
+                                    </h6>
+                                    <div class="activity-history-scroll" style="height: 350px;">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="tx-10 text-uppercase">Log Details</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @forelse($license->logs as $log)
+                                                        <tr>
+                                                            <td class="px-0 py-2 border-0">
+                                                                <div class="d-flex justify-content-between mb-1">
+                                                                    <span class="badge bg-dark-subtle text-white tx-9 px-2">{{ $log->action }}</span>
+                                                                    <span class="tx-9 text-muted">{{ $log->created_at->diffForHumans() }}</span>
+                                                                </div>
+                                                                <p class="tx-11 mb-0"><span class="text-primary">{{ $log->domain ?? '-' }}</span></p>
+                                                                <small class="text-muted tx-10">{{ $log->user->name ?? 'System' }} • {{ $log->ip_address ?? '-' }}</small>
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td class="text-center py-3 text-muted tx-11">No activity recorded.</td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

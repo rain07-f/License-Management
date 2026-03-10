@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'api.key' => \App\Http\Middleware\CheckApiKey::class,
+            'login.cache' => \App\Http\Middleware\CheckLoginCache::class,
         ]);
 
         $middleware->appendToGroup('api', [
