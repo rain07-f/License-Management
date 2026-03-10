@@ -14,7 +14,8 @@
                         <td class="fw-semibold tx-13">{{ $domain->domain_name }}</td>
                         <td class="tx-12 text-muted">{{ $domain->activated_at->format('M d, Y H:i') }}</td>
                         <td class="text-end">
-                            <form class="deactivate-domain-form" action="{{ route('admin.domains.destroy', $domain) }}" method="POST">
+                            <form class="deactivate-domain-form" action="{{ route('admin.domains.destroy', $domain) }}"
+                                method="POST">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-outline-danger btn-xs py-1 px-2" title="Deactivate">
                                     <i data-lucide="minus-circle" class="icon-xs me-1"></i> Deactivate

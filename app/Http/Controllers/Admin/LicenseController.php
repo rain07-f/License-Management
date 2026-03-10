@@ -42,14 +42,6 @@ class LicenseController extends Controller
             });
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('plan_id')) {
-            $query->where('plan_id', $request->plan_id);
-        }
-
         $licenses = $query->latest()->paginate(10)->withQueryString();
         $plans = Plan::all();
         $clients = [];
@@ -133,7 +125,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License generated successfully.',
-                    'data' => $license->load(['owner', 'plan', 'generator', 'domains']),
+                    'data' => $license->load(['owner', 'plan', 'generator']),
                     'display_key' => $license->license_key_display
                 ]);
             }
@@ -159,7 +151,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License assigned to client successfully.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
             ]);
         }
 
@@ -175,9 +167,13 @@ class LicenseController extends Controller
             abort(403);
         }
 
-        $license->load(['owner', 'plan', 'generator', 'domains.activator', 'logs.user']);
+        $license->load(['owner', 'plan', 'generator', 'logs.user']);
+        
+        $domains = $license->domains()->latest()->paginate(5, ['*'], 'domains_page');
+        $logs = $license->logs()->with('user')->latest()->paginate(10, ['*'], 'logs_page');
+        
         $plans = Plan::all();
-        return view('admin.licenses.show', compact('license', 'plans'));
+        return view('admin.licenses.show', compact('license', 'plans', 'domains', 'logs'));
     }
 
     public function revoke(License $license)
@@ -189,7 +185,7 @@ class LicenseController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'License revoked.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
             ]);
         }
 
@@ -208,7 +204,7 @@ class LicenseController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'License renewed successfully.',
-                    'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
+                    'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
                 ]);
             }
 
@@ -219,39 +215,5 @@ class LicenseController extends Controller
             }
             return back()->with('error', $e->getMessage());
         }
-    }
-
-    public function upgradePlan(Request $request, License $license)
-    {
-        $request->validate([
-            'plan_id' => ['required', 'exists:plans,id']
-        ]);
-
-        $plan = Plan::find($request->plan_id);
-
-        $license->update([
-            'plan_id' => $plan->id,
-            'max_domains' => $plan->domain_limit,
-        ]);
-
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Plan upgraded successfully.',
-                'data' => $license->fresh()->load(['owner', 'plan', 'generator', 'domains'])
-            ]);
-        }
-
-        return back()->with('success', 'Plan upgraded successfully.');
-    }
-
-    public function domains(License $license)
-    {
-        $domains = $license->domains()->latest()->paginate(5);
-        return response()->json([
-            'html' => view('admin.licenses.partials._domains_table', compact('license', 'domains'))->render(),
-            'count' => $license->domains()->count(),
-            'max' => $license->max_domains
-        ]);
     }
 }

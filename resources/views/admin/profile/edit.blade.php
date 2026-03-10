@@ -96,10 +96,6 @@
                                     <a class="nav-link" id="profile-line-tab" data-bs-toggle="tab" href="#security-settings"
                                         role="tab">Security Layer</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="sessions-line-tab" data-bs-toggle="tab" href="#active-sessions"
-                                        role="tab">Active Sessions</a>
-                                </li>
                             </ul>
                         </div>
                         <div class="card-body">
@@ -180,61 +176,6 @@
                                             </button>
                                         </div>
                                     </form>
-                                </div>
-                                <div class="tab-pane fade" id="active-sessions" role="tabpanel">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h6 class="card-title mb-0">Device Presence Monitoring</h6>
-                                        @if (count($sessions) > 1)
-                                            <button id="revoke-all-btn" class="btn btn-outline-danger btn-sm">
-                                                <i data-lucide="log-out" class="icon-sm me-1"></i> Logout All Other Devices
-                                            </button>
-                                        @endif
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Device & Browser</th>
-                                                    <th>IP Address</th>
-                                                    <th>Last Activity</th>
-                                                    <th class="text-end">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($sessions as $session)
-                                                    <tr>
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="wd-30 ht-30 rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3">
-                                                                    <i data-lucide="{{ $session['is_current'] ? 'monitor' : 'smartphone' }}" class="icon-sm"></i>
-                                                                </div>
-                                                                <div>
-                                                                    <p class="fw-bolder mb-0 text-white">
-                                                                        {{ $session['device'] }}
-                                                                        @if ($session['is_current'])
-                                                                            <span class="badge bg-success ms-2">Current</span>
-                                                                        @endif
-                                                                    </p>
-                                                                    <small class="text-muted">{{ $session['user_agent'] }}</small>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>{{ $session['ip'] }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($session['login_at'])->diffForHumans() }}</td>
-                                                        <td class="text-end">
-                                                            @if (!$session['is_current'])
-                                                                <button class="btn btn-outline-danger btn-xs revoke-session" data-id="{{ $session['session_id'] }}">
-                                                                    Logout Device
-                                                                </button>
-                                                            @else
-                                                                <span class="text-muted small">Current Session</span>
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -350,68 +291,6 @@
                         Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON.message || 'Failure.' });
                     },
                     complete: function () { btn.prop('disabled', false).text('Update Profile'); }
-                });
-            });
-
-            $('.revoke-session').on('click', function() {
-                const btn = $(this);
-                const sessionId = btn.data('id');
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "This device will be logged out immediately.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, logout device!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        btn.prop('disabled', true).text('Processing...');
-                        $.ajax({
-                            url: "{{ route('admin.profile.sessions.revoke', ':id') }}".replace(':id', sessionId),
-                            method: "POST",
-                            data: { _token: "{{ csrf_token() }}" },
-                            success: function(response) {
-                                Swal.fire('Logged out!', response.message, 'success');
-                                btn.closest('tr').fadeOut();
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', xhr.responseJSON.message || 'Failed to revoke session.', 'error');
-                                btn.prop('disabled', false).text('Logout Device');
-                            }
-                        });
-                    }
-                });
-            });
-
-            $('#revoke-all-btn').on('click', function() {
-                Swal.fire({
-                    title: 'Authorize Global Logout?',
-                    text: "All other active sessions will be terminated immediately.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Yes, terminate all others!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $('#revoke-all-btn').prop('disabled', true).text('Processing...');
-                        $.ajax({
-                            url: "{{ route('admin.profile.sessions.revoke_all') }}",
-                            method: "POST",
-                            data: { _token: "{{ csrf_token() }}" },
-                            success: function(response) {
-                                Swal.fire('Success', response.message, 'success').then(() => {
-                                    location.reload();
-                                });
-                            },
-                            error: function(xhr) {
-                                Swal.fire('Error', xhr.responseJSON.message || 'Failed to revoke sessions.', 'error');
-                                $('#revoke-all-btn').prop('disabled', false).html('<i data-lucide="log-out" class="icon-sm me-1"></i> Logout All Other Devices');
-                            }
-                        });
-                    }
                 });
             });
         });

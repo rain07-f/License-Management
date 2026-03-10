@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
-    <form action="{{ route('admin.licenses.index') }}" method="GET">
-        <div class="row mb-4 align-items-center g-3">
-            <div class="col-12 col-lg-3 text-center text-lg-start">
-                <h5 class="fw-bold mb-0">License Management</h5>
-            </div>
-            <div class="col-12 col-md-6 col-lg-4">
+    <div class="row mb-4 align-items-center g-3">
+        <div class="col-12 col-lg-4 text-center text-lg-start">
+            <h5 class="fw-bold mb-0">License Management</h5>
+        </div>
+        <div class="col-12 col-md-8 col-lg-4">
+            <form action="{{ route('admin.licenses.index') }}" method="GET">
                 <div class="input-group shadow-sm rounded-pill">
                     <input type="text" name="search" class="form-control rounded-pill-start border-0 ps-4"
                         placeholder="Search by hash or owner..." value="{{ request('search') }}">
@@ -14,27 +14,20 @@
                         <i data-lucide="search" class="text-muted icon-sm"></i>
                     </button>
                 </div>
-            </div>
-            <div class="col-12 col-md-3 col-lg-2">
-                <select name="status" class="form-select rounded-pill border-0 shadow-sm ps-3" onchange="this.form.submit()">
-                    <option value="">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="revoked" {{ request('status') == 'revoked' ? 'selected' : '' }}>Revoked</option>
-                </select>
-            </div>
-            <div class="col-12 col-md-3 col-lg-3 text-center text-lg-end">
-                <a href="{{ route('admin.licenses.export') }}" class="btn btn-light rounded-pill px-3 border shadow-sm me-1" title="Export">
-                    <i data-lucide="download" class="icon-sm" ></i> Export
-                </a>
-                @if(auth()->user()->role !== 'client')
-                    <button type="button" class="btn btn-primary rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickGenerateModal" title="Quick Generate">
-                        <i data-lucide="zap" class="icon-sm"></i> Add
-                    </button>
-                @endif
-            </div>
+            </form>
         </div>
-
-    </form>
+        <div class="col-12 col-md-4 col-lg-4 text-center text-lg-end">
+            <a href="{{ route('admin.licenses.export') }}" class="btn btn-light rounded-pill px-4 border shadow-sm me-2">
+                <i data-lucide="download" class="me-1 icon-sm"></i> Export
+            </a>
+            @if(auth()->user()->role !== 'client')
+                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#quickGenerateModal">
+                    <i data-lucide="zap" class="me-1 icon-sm"></i> Generate
+                </button>
+                
+            @endif
+        </div>
+    </div>
 
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
@@ -102,12 +95,9 @@
                                                 <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
                                                         data-bs-target="#assignModal{{ $license->id }}"><i
                                                             data-lucide="user-plus" class="me-2 icon-sm opacity-50"></i> Transfer Ownership</a></li>
-                                                <li>
-                                                    <button class="dropdown-item py-2 upgrade-plan-btn" 
-                                                        data-license-id="{{ $license->id }}">
-                                                        <i data-lucide="trending-up" class="me-2 icon-sm opacity-50"></i> Upgrade Plan
-                                                    </button>
-                                                </li>
+                                                <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                                        data-bs-target="#renewModal{{ $license->id }}"><i
+                                                            data-lucide="refresh-cw" class="me-2 icon-sm opacity-50"></i> Change Plan</a></li>
                                                 <li>
                                                     <form class="licenseFormRevoke" action="{{ route('admin.licenses.revoke', $license) }}" method="POST">
                                                         @csrf
@@ -116,43 +106,37 @@
                                                     </form>
                                                 </li>
                                             @endif
-                                            <li><a class="dropdown-item py-2" href="#"><i
+                                            <li><a class="dropdown-item py-2" href="{{ route('admin.licenses.show', $license) }}"><i
                                                         data-lucide="list" class="me-2 icon-sm opacity-50"></i> View Logs</a></li>
                                         </ul>
                                     </div>
 
-                                    <!-- Assign Modal -->
-                                    <div class="modal fade" id="assignModal{{ $license->id }}" tabindex="-1">
+                                    <!-- Renew Modal -->
+                                    <div class="modal fade" id="renewModal{{ $license->id }}" tabindex="-1">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content border-0 shadow">
-                                                <form class="licenseFormTransfer" action="{{ route('admin.licenses.assign', $license) }}" method="POST">
+                                                <form class="licenseFormRenew" action="{{ route('admin.licenses.renew', $license) }}" method="POST">
                                                     @csrf
-                                                    <div class="modal-header border-0 bg-light">
-                                                        <h5 class="modal-title fw-bold">Transfer License Ownership</h5>
-                                                        <button type="button" class="btn-close"
-                                                            data-bs-dismiss="modal"></button>
+                                                    <div class="modal-header border-0 bg-dark">
+                                                        <h5 class="modal-title fw-bold">Change License Plan</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body p-4 text-start">
-                                                        <p class="text-muted small mb-4">Transfer this license to one of your
-                                                            sub-users (clients).</p>
+                                                        <p class="text-muted small mb-4">Select a new plan for this license. The expiration will be extended based on the new plan.</p>
                                                         <div class="mb-3">
-                                                            <label class="form-label small fw-medium">Select Client</label>
-                                                            <select name="client_id" class="form-select rounded-8" required>
-                                                                @php
-                                                                    $clients = auth()->user()->isSuperAdmin() ? \App\Models\User::where('role', 'client')->get() : \App\Models\User::where('parent_id', auth()->id())->where('role', 'client')->get();
-                                                                @endphp
-                                                                @foreach($clients as $client)
-                                                                    <option value="{{ $client->id }}">{{ $client->name }}
-                                                                        ({{ $client->email }})</option>
+                                                            <label class="form-label small fw-medium">Select Plan</label>
+                                                            <select name="plan_id" class="form-select rounded-8" required>
+                                                                @foreach($plans as $plan)
+                                                                    <option value="{{ $plan->id }}" {{ $license->plan_id == $plan->id ? 'selected' : '' }}>
+                                                                        {{ $plan->name }} ({{ $plan->duration_days }} Days - {{ $plan->domain_limit }} Domains)
+                                                                    </option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer border-0 p-4 pt-0">
-                                                        <button type="button" class="btn btn-light rounded-pill px-4"
-                                                            data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit"
-                                                            class="btn btn-primary rounded-pill px-4 shadow-sm">Transfer</button>
+                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Renew Now</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -230,48 +214,9 @@
         </div>
     </div>
 
-    <!-- Upgrade Plan Modal -->
-    <div class="modal fade" id="upgradePlanModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <form id="upgradePlanForm">
-                    @csrf
-                    <div class="modal-header border-0 bg-dark">
-                        <h5 class="modal-title fw-bold">Upgrade License Plan</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <p class="text-muted small mb-4">Select a new plan for this license. The changes will take effect immediately.</p>
-                        <div class="mb-3">
-                            <label class="form-label small fw-medium">Select New Plan</label>
-                            <select name="plan_id" id="upgradePlanSelect" class="form-select rounded-8" required>
-                                @foreach($plans as $plan)
-                                    <option value="{{ $plan->id }}">{{ $plan->name }} (${{ $plan->price }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 p-4 pt-0">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Update Plan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     @push('custom-scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            "use strict";
-            const $ = window.jQuery;
-            const bootstrap = window.bootstrap;
-
-            if (!$) {
-                console.error("jQuery is not loaded!");
-                return;
-            }
-
             // Helper to build row HTML
             function buildLicenseRow(license) {
                 const statusClasses = {
@@ -293,11 +238,9 @@
                         <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
                                 data-bs-target="#assignModal${license.id}"><i
                                     data-lucide="user-plus" class="me-2 icon-sm opacity-50"></i> Transfer Ownership</a></li>
-                        <li>
-                            <button class="dropdown-item py-2 upgrade-plan-btn" data-license-id="${license.id}">
-                                <i data-lucide="trending-up" class="me-2 icon-sm opacity-50"></i> Upgrade Plan
-                            </button>
-                        </li>
+                        <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                data-bs-target="#renewModal${license.id}"><i
+                                    data-lucide="refresh-cw" class="me-2 icon-sm opacity-50"></i> Change Plan</a></li>
                         <li>
                             <form class="licenseFormRevoke" action="/admin/licenses/${license.id}/revoke" method="POST">
                                 <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
@@ -313,7 +256,7 @@
                         <td class="px-4 py-3">
                             <a href="/admin/licenses/${license.id}" class="text-decoration-none">
                                 <span class="font-monospace fw-medium text-primary-dark small">
-                                    ${license.license_key_hash ? license.license_key_hash.substr(0, 12) : '...'}...
+                                    ${license.license_key_hash.substr(0, 12)}...
                                 </span>
                             </a>
                         </td>
@@ -329,7 +272,7 @@
                         </td>
                         <td class="py-3 text-center">
                             <span class="badge bg-dark text-white fw-bold rounded-pill px-3">
-                                ${domainsCount} / ${license.max_domains || (license.plan ? license.plan.domain_limit : '0')}
+                                ${domainsCount} / ${license.max_domains || license.plan.domain_limit}
                             </span>
                         </td>
                         <td class="py-3 text-muted">${expiresAt}</td>
@@ -354,8 +297,7 @@
                 e.preventDefault();
                 let form = $(this);
                 let btn = form.find('button[type=submit]');
-                let modalEl = document.getElementById('quickGenerateModal');
-                let modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                let modal = bootstrap.Modal.getInstance(document.getElementById('quickGenerateModal'));
 
                 $.ajax({
                     url: form.attr('action'),
@@ -394,7 +336,7 @@
                 e.preventDefault();
                 let form = $(this);
                 let modal = form.closest('.modal');
-                let bootstrapModal = bootstrap.Modal.getInstance(modal[0]) || new bootstrap.Modal(modal[0]);
+                let bootstrapModal = bootstrap.Modal.getInstance(modal[0]);
 
                 $.ajax({
                     url: form.attr('action'),
@@ -411,7 +353,7 @@
                 });
             });
 
-            // AJAX Revoke
+            // AJAX Revoke (same as before)
             $(document).on('submit', '.licenseFormRevoke', function(e) {
                 e.preventDefault();
                 let form = $(this);
@@ -433,21 +375,16 @@
                 }
             });
 
-            // Handle Upgrade Plan Click
-            $(document).on('click', '.upgrade-plan-btn', function() {
-                let licenseId = $(this).data('license-id');
-                $('#upgradePlanModal').data('license-id', licenseId).modal('show');
-            });
-
-            // Handle Upgrade Plan Submit
-            $('#upgradePlanForm').on('submit', function(e) {
+            // AJAX Renew/Change Plan
+            $(document).on('submit', '.licenseFormRenew', function(e) {
                 e.preventDefault();
-                let licenseId = $('#upgradePlanModal').data('license-id');
                 let form = $(this);
+                let modal = form.closest('.modal');
+                let bootstrapModal = bootstrap.Modal.getInstance(modal[0]);
                 let btn = form.find('button[type=submit]');
 
                 $.ajax({
-                    url: `/admin/licenses/${licenseId}/upgrade`,
+                    url: form.attr('action'),
                     method: 'POST',
                     data: form.serialize(),
                     beforeSend: function() {
@@ -455,17 +392,17 @@
                     },
                     success: function(res) {
                         if(res.success) {
-                            $('#upgradePlanModal').modal('hide');
+                            bootstrapModal.hide();
                             const updatedRow = buildLicenseRow(res.data);
                             $(`#licenseRow-${res.data.id}`).replaceWith(updatedRow);
                             if (window.lucide) lucide.createIcons();
                         }
                     },
                     error: function(xhr) {
-                        alert('Failed to update plan.');
+                        alert('Failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
                     },
                     complete: function() {
-                        btn.prop('disabled', false).text('Update Plan');
+                        btn.prop('disabled', false).text('Renew Now');
                     }
                 });
             });

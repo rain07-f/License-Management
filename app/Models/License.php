@@ -43,6 +43,6 @@ class License extends Model
 
     public function logs()
     {
-        return $this->hasMany(LicenseLog::class)->latest();
+        return $this->hasMany(LicenseLog::class);
     }
 }
