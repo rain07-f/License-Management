@@ -105,6 +105,21 @@
                                                                 data-lucide="slash" class="me-2 icon-sm opacity-50"></i> Revoke License</button>
                                                     </form>
                                                 </li>
+                                            @elseif($license->status === 'revoked')
+                                                <li>
+                                                    <form class="licenseFormReactivate" action="{{ route('admin.licenses.reactivate', $license) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="dropdown-item py-2 text-success"><i
+                                                                data-lucide="play-circle" class="me-2 icon-sm opacity-50"></i> Reactivate</button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form class="licenseFormDelete" action="{{ route('admin.licenses.destroy', $license) }}" method="POST">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="dropdown-item py-2 text-danger"><i
+                                                                data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently</button>
+                                                    </form>
+                                                </li>
                                             @endif
                                             <li><a class="dropdown-item py-2" href="{{ route('admin.licenses.show', $license) }}"><i
                                                         data-lucide="list" class="me-2 icon-sm opacity-50"></i> View Logs</a></li>
@@ -249,6 +264,24 @@
                             </form>
                         </li>
                     `;
+                } else if (license.status === 'revoked') {
+                    actions = `
+                        <li>
+                            <form class="licenseFormReactivate" action="/admin/licenses/${license.id}/reactivate" method="POST">
+                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                <button type="submit" class="dropdown-item py-2 text-success"><i
+                                        data-lucide="play-circle" class="me-2 icon-sm opacity-50"></i> Reactivate</button>
+                            </form>
+                        </li>
+                        <li>
+                            <form class="licenseFormDelete" action="/admin/licenses/${license.id}" method="POST">
+                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="dropdown-item py-2 text-danger"><i
+                                        data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently</button>
+                            </form>
+                        </li>
+                    `;
                 }
 
                 return `
@@ -375,36 +408,44 @@
                 }
             });
 
-            // AJAX Renew/Change Plan
-            $(document).on('submit', '.licenseFormRenew', function(e) {
+            // AJAX Reactivate
+            $(document).on('submit', '.licenseFormReactivate', function(e) {
                 e.preventDefault();
                 let form = $(this);
-                let modal = form.closest('.modal');
-                let bootstrapModal = bootstrap.Modal.getInstance(modal[0]);
-                let btn = form.find('button[type=submit]');
+                let row = form.closest('tr');
 
                 $.ajax({
                     url: form.attr('action'),
                     method: 'POST',
                     data: form.serialize(),
-                    beforeSend: function() {
-                        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Updating...');
-                    },
                     success: function(res) {
                         if(res.success) {
-                            bootstrapModal.hide();
                             const updatedRow = buildLicenseRow(res.data);
-                            $(`#licenseRow-${res.data.id}`).replaceWith(updatedRow);
+                            row.replaceWith(updatedRow);
                             if (window.lucide) lucide.createIcons();
                         }
-                    },
-                    error: function(xhr) {
-                        alert('Failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).text('Renew Now');
                     }
                 });
+            });
+
+            // AJAX Delete
+            $(document).on('submit', '.licenseFormDelete', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let row = form.closest('tr');
+
+                if(confirm('Are you sure you want to PERMANENTLY delete this license? This cannot be undone.')) {
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize(),
+                        success: function(res) {
+                            if(res.success) {
+                                row.fadeOut(300, function() { $(this).remove(); });
+                            }
+                        }
+                    });
+                }
             });
 
             // Copy logic

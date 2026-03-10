@@ -216,4 +216,41 @@ class LicenseController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
+    public function reactivate(License $license)
+    {
+        $license->update(['status' => 'active']);
+        $this->licenseService->logAction($license, auth()->user(), 'reactivate');
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License reactivated.',
+                'data' => $license->fresh()->load(['owner', 'plan', 'generator'])
+            ]);
+        }
+
+        return back()->with('success', 'License reactivated.');
+    }
+
+    public function destroy(License $license)
+    {
+        // Optional: Check if user has permission
+        if (!auth()->user()->isSuperAdmin() && $license->generated_by !== auth()->id()) {
+            abort(403);
+        }
+
+        $id = $license->id;
+        $this->licenseService->logAction($license, auth()->user(), 'delete');
+        $license->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'License deleted.',
+                'id' => $id
+            ]);
+        }
+
+        return redirect()->route('admin.licenses.index')->with('success', 'License deleted.');
+    }
 }

@@ -35,6 +35,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('licenses', LicenseController::class)->except(['index', 'show']);
         Route::post('/licenses/{license}/assign', [LicenseController::class, 'assign'])->name('licenses.assign');
         Route::post('/licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
+        Route::post('/licenses/{license}/reactivate', [LicenseController::class, 'reactivate'])->name('licenses.reactivate');
         Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
     });
 

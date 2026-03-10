@@ -114,17 +114,35 @@
                         </div>
 
                         <div class="col-md-3">
-                            @if(auth()->user()->role !== 'client' && $license->status !== 'revoked')
+                            @if(auth()->user()->role !== 'client')
                                 <div class="card border border-danger mb-3">
                                     <div class="card-body p-3">
                                         <h6 class="tx-12 fw-bolder text-danger mb-3 text-uppercase">Danger Zone</h6>
-                                        <form action="{{ route('admin.licenses.revoke', $license) }}" method="POST"
-                                            onsubmit="return confirm('REVOKE this license? This is permanent.')">
-                                            @csrf
-                                            <button type="submit" class="btn btn-danger w-100 btn-sm">
-                                                Revoke License
-                                            </button>
-                                        </form>
+                                        @if($license->status !== 'revoked')
+                                            <form action="{{ route('admin.licenses.revoke', $license) }}" method="POST"
+                                                onsubmit="return confirm('REVOKE this license? This is permanent.')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-danger w-100 btn-sm">
+                                                    Revoke License
+                                                </button>
+                                            </form>
+                                        @else
+                                            <div class="d-grid gap-2">
+                                                <form action="{{ route('admin.licenses.reactivate', $license) }}" method="POST">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-success w-100 btn-sm">
+                                                        <i data-lucide="play-circle" class="icon-xs me-1"></i> Reactivate
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.licenses.destroy', $license) }}" method="POST"
+                                                    onsubmit="return confirm('PERMANENTLY delete this license? This cannot be undone.')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm">
+                                                        <i data-lucide="trash-2" class="icon-xs me-1"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endif
