@@ -11,22 +11,16 @@
     <div class="row">
         <div class="col-12 grid-margin">
             <div class="card">
-                <div class="position-relative">
-                    <figure class="overflow-hidden mb-0 d-flex justify-content-center">
-                        <img src="https://via.placeholder.com/1560x370" class="rounded-top" alt="profile cover"
-                            style="width: 100%; height: 200px; object-fit: cover;">
-                    </figure>
-                    <div
-                        class="d-flex justify-content-between align-items-center position-absolute top-90 w-100 px-2 px-md-4 mt-n4">
+                <div class="card-header border-bottom-0 pt-4 px-4 pb-0">
+                    <div class="d-flex justify-content-between align-items-center w-100">
                         <div class="d-flex align-items-center">
                             <img id="profile-avatar-preview" class="wd-70 rounded-circle border border-primary border-4"
                                 src="{{ $user->avatar ? asset('storage/' . $user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=4B49AC&color=fff&size=100' }}"
                                 alt="profile">
                             <span
-                                class="h4 ms-3 text-white fw-bolder tx-20 shadow-sm">{{ $user->full_name ?? $user->name }}</span>
+                                class="h4 ms-3 fw-bolder tx-20">{{ $user->full_name ?? $user->name }}</span>
                         </div>
                         <div class="d-none d-md-block">
-
                             <input type="file" id="avatar-input" class="d-none" accept="image/*">
                         </div>
                     </div>
@@ -209,11 +203,6 @@
 
 @push('custom-styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <style>
-        .top-90 {
-            top: 70%;
-        }
-    </style>
 @endpush
 
 @push('custom-scripts')

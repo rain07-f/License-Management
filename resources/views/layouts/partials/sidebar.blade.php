@@ -1,7 +1,7 @@
 <nav class="sidebar">
     <div class="sidebar-header">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-            License<span>Manager</span>
+            License
         </a>
         <div class="sidebar-toggler not-active">
             <span></span>
