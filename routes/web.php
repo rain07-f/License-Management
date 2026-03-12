@@ -42,8 +42,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('licenses', LicenseController::class)->only(['index', 'show']);
 
     // Domains & Logs
-    Route::get('/domains', [DomainController::class, 'index'])->name('domains.index');
-    Route::delete('/domains/{domain}', [DomainController::class, 'destroy'])->name('domains.destroy');
+    Route::prefix('domains')->name('domains.')->group(function () {
+        Route::get('/', [DomainController::class, 'index'])->name('index');
+        Route::get('/{domain}/view', [DomainController::class, 'show'])->name('view');
+        Route::get('/{domain}/activity', [DomainController::class, 'activity'])->name('activity');
+        Route::post('/{domain}/deactivate', [DomainController::class, 'deactivate'])->name('deactivate');
+        Route::post('/{domain}/reactivate', [DomainController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{domain}', [DomainController::class, 'destroy'])->name('destroy');
+    });
     Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
     // Super Admin Only

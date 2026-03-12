@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Domain;
+use App\Models\DomainActivityLog;
 use App\Services\DomainService;
 use App\Services\LicenseService;
 
@@ -45,6 +46,61 @@ class DomainController extends Controller
         return view('admin.domains.index', compact('domains'));
     }
 
+    public function show($id)
+    {
+        $domain = Domain::with(['license.owner', 'license.plan'])->findOrFail($id);
+        $logs = DomainActivityLog::where('domain_id', $domain->id)
+            ->latest()
+            ->take(10)
+            ->get();
+            
+        return view('admin.domains.show', compact('domain', 'logs'));
+    }
+
+    public function activity($id)
+    {
+        $domain = Domain::findOrFail($id);
+        $logs = DomainActivityLog::where('domain_id', $domain->id)
+            ->latest()
+            ->paginate(50);
+
+        return view('admin.domains.activity', compact('domain', 'logs'));
+    }
+
+    public function deactivate($id)
+    {
+        $domain = Domain::findOrFail($id);
+
+        $domain->status = 'inactive';
+        $domain->save();
+
+        DomainActivityLog::create([
+            'domain_id' => $domain->id,
+            'event_type' => 'domain_deactivated',
+            'message' => 'Domain deactivated by admin',
+            'ip_address' => request()->ip()
+        ]);
+
+        return back()->with('success', 'Domain deactivated.');
+    }
+
+    public function reactivate($id)
+    {
+        $domain = Domain::findOrFail($id);
+
+        $domain->status = 'active';
+        $domain->save();
+
+        DomainActivityLog::create([
+            'domain_id' => $domain->id,
+            'event_type' => 'domain_reactivated',
+            'message' => 'Domain reactivated by admin',
+            'ip_address' => request()->ip()
+        ]);
+
+        return back()->with('success', 'Domain reactivated.');
+    }
+
     public function destroy(Domain $domain)
     {
         $user = auth()->user();
@@ -57,10 +113,20 @@ class DomainController extends Controller
         $license = $domain->license;
         $domainName = $domain->domain_name;
 
-        $domain->delete();
+        // Instead of deleting, we now update status to inactive
+        $domain->status = 'inactive';
+        $domain->save();
 
-        // Log the manual deactivation
+        // Log using the old method (LicenseService) for backward compatibility if needed
         $this->licenseService->logAction($license, $user, 'deactivate', $domainName, request()->ip());
+
+        // Log using the new DomainActivityLog
+        DomainActivityLog::create([
+            'domain_id' => $domain->id,
+            'event_type' => 'domain_deactivated',
+            'message' => 'Domain deactivated by admin (legacy action)',
+            'ip_address' => request()->ip()
+        ]);
 
         if (request()->ajax()) {
             return response()->json([

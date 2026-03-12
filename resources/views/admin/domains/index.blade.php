@@ -49,7 +49,13 @@
                                         <td class="fw-semibold">
                                             <div class="d-flex align-items-center">
                                                 <i data-lucide="globe" class="icon-sm text-primary me-2"></i>
-                                                {{ $domain->domain_name }}
+                                                @if($domain->status === 'inactive')
+                                                    <span class="text-danger text-decoration-line-through">
+                                                        {{ $domain->domain_name }}
+                                                    </span>
+                                                @else
+                                                    {{ $domain->domain_name }}
+                                                @endif
                                             </div>
                                         </td>
                                         <td>
@@ -70,19 +76,34 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-success-subtle text-success px-2 py-1">
+                                            <span class="badge {{ $domain->status === 'active' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }} px-2 py-1">
                                                 {{ ucfirst($domain->status) }}
                                             </span>
                                         </td>
                                         <td class="text-end">
-                                            <form class="domainDeactivateForm"
-                                                action="{{ route('admin.domains.destroy', $domain) }}" method="POST">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger btn-icon btn-xs"
-                                                    title="Deactivate">
-                                                    <i data-lucide="x-circle"></i>
-                                                </button>
-                                            </form>
+                                            <div class="d-flex justify-content-end gap-1">
+                                                <a href="{{ route('admin.domains.view', $domain->id) }}"
+                                                    class="btn btn-outline-info btn-icon btn-xs" title="View Detail">
+                                                    <i data-lucide="eye"></i>
+                                                </a>
+                                                @if($domain->status === 'active')
+                                                    <form method="POST" action="{{ route('admin.domains.deactivate', $domain->id) }}" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-outline-danger btn-icon btn-xs"
+                                                            title="Deactivate" onclick="return confirm('Are you sure you want to deactivate this domain?')">
+                                                            <i data-lucide="x-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('admin.domains.reactivate', $domain->id) }}" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-outline-success btn-icon btn-xs"
+                                                            title="Reactivate" onclick="return confirm('Are you sure you want to reactivate this domain?')">
+                                                            <i data-lucide="check-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty
@@ -106,29 +127,4 @@
             </div>
         </div>
     </div>
-    @push('custom-scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // AJAX Deactivate
-                $(document).on('submit', '.domainDeactivateForm', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let row = form.closest('tr');
-
-                    if (confirm('Are you sure you want to deactivate this domain?')) {
-                        $.ajax({
-                            url: form.attr('action'),
-                            method: 'POST',
-                            data: form.serialize(),
-                            success: function (res) {
-                                if (res.success) {
-                                    row.fadeOut(300, function () { $(this).remove(); });
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-        </script>
-    @endpush
 @endsection
