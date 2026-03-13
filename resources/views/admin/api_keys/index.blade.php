@@ -12,9 +12,12 @@
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="card-title mb-0">API Keys</h6>
-                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal"
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                        <div>
+                            <h6 class="card-title mb-0">API Keys</h6>
+                            <p class="text-muted small d-block d-md-none mt-1">Manage your access tokens</p>
+                        </div>
+                        <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm w-100 w-md-auto" data-bs-toggle="modal"
                             data-bs-target="#generateKeyModal">
                             <i class="btn-icon-prepend" data-lucide="plus"></i>
                             Generate New API Key
@@ -58,21 +61,21 @@
                             <tbody id="apiKeysTableBody">
                                 @foreach($apiKeys as $key)
                                     <tr id="apiKeyRow-{{ $key->id }}">
-                                        <td>
+                                        <td data-label="Name">
                                             <div class="fw-bold text-primary">{{ $key->name }}</div>
                                         </td>
-                                        <td>
+                                        <td data-label="Fingerprint">
                                             <code
                                                 class="text-muted small">{{ substr($key->key_hash, 0, 8) }}****{{ substr($key->key_hash, -8) }}</code>
                                         </td>
-                                        <td>
+                                        <td data-label="Status">
                                             @if($key->is_active)
                                                 <span class="badge bg-success-subtle text-success">Active</span>
                                             @else
                                                 <span class="badge bg-danger-subtle text-danger">Inactive</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td data-label="Created At">
                                             {{ $key->created_at->format('M d, Y H:i') }}
                                         </td>
                                         <td class="px-4 py-3 text-end">
@@ -313,10 +316,10 @@
 
                     return `
                         <tr id="apiKeyRow-${key.id}">
-                            <td><div class="fw-bold text-primary">${key.name}</div></td>
-                            <td><code class="text-muted small">${fingerprint}</code></td>
-                            <td>${statusBadge}</td>
-                            <td>${createdAt}</td>
+                            <td data-label="Name"><div class="fw-bold text-primary">${key.name}</div></td>
+                            <td data-label="Fingerprint"><code class="text-muted small">${fingerprint}</code></td>
+                            <td data-label="Status">${statusBadge}</td>
+                            <td data-label="Created At">${createdAt}</td>
                             <td class="px-4 py-3 text-end">
                                 <div class="dropdown">
                                     <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
@@ -588,4 +591,53 @@
             });
 >>>>>>> 1b5aae3 (fix-reveal-key)
     </script>
+    <style>
+        @media (max-width: 767.98px) {
+            .table-responsive {
+                overflow-x: visible !important;
+                border: 0;
+            }
+            .table thead {
+                display: none;
+            }
+            .table tr {
+                display: block;
+                margin-bottom: 1.25rem;
+                border: 1px solid var(--bs-border-color);
+                border-radius: 0.75rem;
+                padding: 1.25rem;
+                background: rgba(var(--bs-dark-rgb), 0.15);
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+            .table td {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                border: 0;
+                padding: 0.6rem 0;
+                text-align: left;
+                width: 100%;
+            }
+            .table td:before {
+                content: attr(data-label);
+                font-weight: 700;
+                text-transform: uppercase;
+                font-size: 0.65rem;
+                letter-spacing: 0.8px;
+                color: var(--bs-primary);
+                margin-bottom: 0.25rem;
+                opacity: 0.8;
+            }
+            .table td:last-child {
+                border-top: 1px solid var(--bs-border-color);
+                padding-top: 1rem;
+                margin-top: 0.5rem;
+                display: block;
+                text-align: right;
+            }
+            .table td:last-child:before {
+                display: none;
+            }
+        }
+    </style>
 @endsection
