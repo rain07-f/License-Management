@@ -23,45 +23,42 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        Log::info('Update request initiated. Form Type: ' . $request->input('form_type'), $request->all());
         $user = auth()->user();
 
         // Case 1: Password Update
         if ($request->input('form_type') === 'password') {
-            Log::info('Entering password update logic for user: ' . $user->email);
-            try {
-                $request->validate([
-                    'current_password' => ['required', 'current_password'],
-                    'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
-                ]);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                Log::error('Validation failed for user ' . $user->id . ':', $e->errors());
-                throw $e;
-            }
+            $request->validate([
+                'current_password' => ['required', 'current_password'],
+                'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+            ]);
 
-            // Rely on the "hashed" cast in User model. 
-            // Setting it as a string will trigger the cast-hashing.
+            // Rely on the "hashed" cast in User model
             $user->password = $request->password;
             
             if ($user->save()) {
-                Log::info('Password saved successfully to database for user: ' . $user->id);
-                
                 // Secure other devices and update current session with new hash
                 Auth::logoutOtherDevices($request->password);
                 
-                // Re-authenticate to ensure session is crystal clear
                 Auth::login($user);
                 $request->session()->regenerate();
-            } else {
-                Log::error('FAILED to save password to database for user: ' . $user->id);
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'message' => 'Password updated successfully! Other sessions secured.',
+                        'redirect' => route('admin.profile.edit') . '#security-settings'
+                    ]);
+                }
+
+                return redirect(route('admin.profile.edit') . '#security-settings')
+                    ->with('success', 'Password updated successfully!');
             }
 
-            return response()->json([
-                'message' => 'Password updated successfully! Other sessions secured.',
-            ]);
+            if ($request->ajax()) {
+                return response()->json(['message' => 'Failed to save password.'], 500);
+            }
+
+            return back()->with('error', 'Failed to save password.');
         }
-        
-        Log::info('Falling back to profile update branch for user: ' . $user->email);
 
         // Case 2: Profile Update
         $validated = $request->validate([
@@ -75,12 +72,21 @@ class ProfileController extends Controller
         ]);
 
         $user->fill($validated);
-        $user->save();
+        if ($user->save()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'message' => 'Profile updated successfully!',
+                ]);
+            }
 
-        return response()->json([
-            'message' => 'Profile updated successfully!',
-            'user' => $user
-        ]);
+            return redirect()->route('admin.profile.edit')->with('success', 'Profile updated successfully!');
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Failed to update profile.'], 500);
+        }
+
+        return back()->with('error', 'Failed to update profile.');
     }
 
     public function updateAvatar(Request $request)
