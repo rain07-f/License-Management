@@ -12,15 +12,18 @@
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="card-title mb-0">Subscription Plans</h6>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
                         <div>
-                            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal"
+                            <h6 class="card-title mb-0">Subscription Plans</h6>
+                            <p class="text-muted small d-block d-md-none mt-1">Manage your service offerings</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm flex-fill flex-md-grow-0" data-bs-toggle="modal"
                                 data-bs-target="#quickAddPlanModal">
                                 <i data-lucide="plus" class="me-1 icon-sm"></i> Quick Add
                             </button>
                             <a href="{{ route('admin.plans.create') }}"
-                                class="btn btn-outline-primary rounded-pill px-4 shadow-sm ms-2">
+                                class="btn btn-outline-primary rounded-pill px-4 shadow-sm flex-fill flex-md-grow-0">
                                 <i data-lucide="zap" class="me-1 icon-sm"></i> Full Form
                             </a>
                         </div>
@@ -40,17 +43,17 @@
                             <tbody id="plansTableBody">
                                 @foreach($plans as $plan)
                                     <tr id="planRow-{{ $plan->id }}">
-                                        <td>
+                                        <td data-label="Plan Name">
                                             <div class="fw-bold text-primary">{{ $plan->name }}</div>
                                             <small class="text-secondary d-block mt-1">{{ $plan->description }}</small>
                                         </td>
-                                        <td>
+                                        <td data-label="Price">
                                             <span class="fw-bolder fs-5 text-light">${{ number_format($plan->price, 2) }}</span>
                                         </td>
-                                        <td>
+                                        <td data-label="Duration">
                                             <span class="badge bg-info-subtle text-info">{{ $plan->duration_days }} Days</span>
                                         </td>
-                                        <td>
+                                        <td data-label="Domain Limit">
                                             <span class="badge bg-primary-subtle text-primary">{{ $plan->domain_limit }}
                                                 Domains</span>
                                         </td>
@@ -154,17 +157,17 @@
 
                     return `
                                                     <tr id="planRow-${plan.id}">
-                                                        <td>
+                                                        <td data-label="Plan Name">
                                                             <div class="fw-bold text-primary">${plan.name}</div>
                                                             <small class="text-secondary d-block mt-1">${plan.description}</small>
                                                         </td>
-                                                        <td>
+                                                        <td data-label="Price">
                                                             <span class="fw-bolder fs-5 text-dark">${formattedPrice}</span>
                                                         </td>
-                                                        <td>
+                                                        <td data-label="Duration">
                                                             <span class="badge bg-info-subtle text-info">${plan.duration_days} Days</span>
                                                         </td>
-                                                        <td>
+                                                        <td data-label="Domain Limit">
                                                             <span class="badge bg-primary-subtle text-primary">${plan.domain_limit} Domains</span>
                                                         </td>
                                                         <td class="px-4 py-3 text-end">
@@ -242,5 +245,64 @@
                 });
             });
         </script>
+    @endpush
+    @push('custom-styles')
+        <style>
+            @media (max-width: 767.98px) {
+                .table-responsive {
+                    overflow-x: visible !important;
+                    border: 0;
+                }
+                .table thead {
+                    display: none;
+                }
+                .table tr {
+                    display: block;
+                    margin-bottom: 1.25rem;
+                    border: 1px solid var(--bs-border-color);
+                    border-radius: 0.75rem;
+                    padding: 1.25rem;
+                    background: rgba(var(--bs-dark-rgb), 0.15);
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                }
+                .table td {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    border: 0;
+                    padding: 0.6rem 0;
+                    text-align: left;
+                    width: 100%;
+                }
+                .table td:before {
+                    content: attr(data-label);
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    font-size: 0.65rem;
+                    letter-spacing: 0.8px;
+                    color: var(--bs-primary);
+                    margin-bottom: 0.25rem;
+                    opacity: 0.8;
+                }
+                .table td:last-child {
+                    border-top: 1px solid var(--bs-border-color);
+                    padding-top: 1rem;
+                    margin-top: 0.5rem;
+                    display: block;
+                    text-align: right;
+                }
+                .table td:last-child:before {
+                    display: none;
+                }
+                
+                /* Layout adjustments to ensure no overflow */
+                .card-body {
+                    padding: 1rem;
+                }
+                .page-breadcrumb {
+                    margin-bottom: 1.5rem;
+                }
+            }
+        </style>
     @endpush
 @endsection
