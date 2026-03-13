@@ -38,7 +38,7 @@
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date From</label>
-                                <div class="input-group datepicker-wrap">
+                                <div class="input-group datepicker-wrap" id="date_from_wrap">
                                     <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
                                         <i data-lucide="calendar" class="icon-sm text-secondary"></i>
                                     </span>
@@ -51,7 +51,7 @@
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date To</label>
-                                <div class="input-group datepicker-wrap">
+                                <div class="input-group datepicker-wrap" id="date_to_wrap">
                                     <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
                                         <i data-lucide="calendar" class="icon-sm text-secondary"></i>
                                     </span>
@@ -151,21 +151,25 @@
     </div>
 @endsection
 
-@push('custom-scripts')
+@section('scripts')
     <script>
         $(function() {
             'use strict';
 
-            if ($('.datepicker-wrap').length) {
-                $('.datepicker-wrap').each(function() {
-                    flatpickr(this, {
-                        wrap: true,
-                        dateFormat: "Y-m-d",
-                        allowInput: true,
-                        disableMobile: "true"
-                    });
-                });
+            const flatpickrConfig = {
+                wrap: true,
+                dateFormat: "Y-m-d",
+                allowInput: true,
+                disableMobile: true
+            };
+
+            if ($('#date_from_wrap').length) {
+                flatpickr("#date_from_wrap", flatpickrConfig);
+            }
+            
+            if ($('#date_to_wrap').length) {
+                flatpickr("#date_to_wrap", flatpickrConfig);
             }
         });
     </script>
-@endpush
+@endsection
