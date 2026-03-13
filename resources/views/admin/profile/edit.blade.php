@@ -95,7 +95,7 @@
                         <div class="card-body">
                             <div class="tab-content mt-3" id="lineTabContent">
                                 <div class="tab-pane fade show active" id="personal-info" role="tabpanel">
-                                    <form id="profile-form">
+                                    <form id="profile-form" method="POST">
                                         @csrf
                                         <div class="row mb-3">
                                             <div class="col-md-6">
@@ -143,7 +143,7 @@
                                     </form>
                                 </div>
                                 <div class="tab-pane fade" id="security-settings" role="tabpanel">
-                                    <form id="security-form">
+                                    <form id="security-form" method="POST">
                                         @csrf
                                         <div class="alert alert-fill-warning d-flex align-items-center mb-4 border-0">
                                             <i data-lucide="shield" class="icon-sm me-2"></i>
@@ -151,18 +151,52 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Current Password</label>
-                                            <input type="password" name="current_password" class="form-control">
+                                            <div class="input-group">
+                                                <input type="password" name="current_password" id="current_password" class="form-control">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password')">
+                                                    <i data-lucide="eye" class="icon-sm"></i>
+                                                </button>
+                                            </div>
+                                            <div class="error-current_password text-danger tx-12 mt-1"></div>
                                         </div>
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                                                 <label class="form-label">New Password</label>
-                                                <input type="password" name="new_password" class="form-control">
+                                                <div class="input-group">
+                                                    <input type="password" name="password" id="new_password" class="form-control" onkeyup="checkPasswordStrength()">
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_password')">
+                                                        <i data-lucide="eye" class="icon-sm"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <div class="progress mb-1" style="height: 5px;">
+                                                        <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                    </div>
+                                                    <div class="tx-11 fw-bold text-uppercase">
+                                                        STRENGTH: <span id="password-strength">-</span>
+                                                    </div>
+                                                </div>
+                                                <div class="error-password text-danger tx-12 mt-1"></div>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Confirm New Password</label>
-                                                <input type="password" name="new_password_confirmation"
-                                                    class="form-control">
+                                                <div class="input-group">
+                                                    <input type="password" name="password_confirmation" id="new_password_confirmation" class="form-control">
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_password_confirmation')">
+                                                        <i data-lucide="eye" class="icon-sm"></i>
+                                                    </button>
+                                                </div>
                                             </div>
+                                        </div>
+                                        <div class="mb-3 p-3 bg-light rounded border">
+                                            <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">Password Requirements:</label>
+                                            <ul class="tx-12 text-muted mb-0 ps-3">
+                                                <li id="req-length">• Minimum 8 characters</li>
+                                                <li id="req-upper">• At least 1 uppercase letter</li>
+                                                <li id="req-lower">• At least 1 lowercase letter</li>
+                                                <li id="req-number">• At least 1 number</li>
+                                                <li id="req-symbol">• At least 1 special character</li>
+                                            </ul>
                                         </div>
                                         <div class="text-end">
                                             <button type="submit" class="btn btn-danger btn-icon-text">
@@ -209,6 +243,82 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Global Utility Functions for Security Layer
+        (function() {
+            window.togglePassword = function(fieldId) {
+                const field = document.getElementById(fieldId);
+                if (!field) return;
+                
+                field.type = field.type === "password" ? "text" : "password";
+                
+                // Update Icon
+                const btn = field.parentElement.querySelector('button');
+                const icon = btn ? btn.querySelector('i') : null;
+                if (icon) {
+                    icon.setAttribute('data-lucide', field.type === "password" ? 'eye' : 'eye-off');
+                    if (window.lucide) window.lucide.createIcons();
+                }
+            };
+
+            window.checkPasswordStrength = function() {
+                const passwordInput = document.getElementById("new_password");
+                const strengthLabel = document.getElementById("password-strength");
+                const bar = document.getElementById("password-strength-bar");
+                
+                if (!passwordInput || !strengthLabel) return;
+                
+                const password = passwordInput.value;
+                if (!password) {
+                    strengthLabel.innerText = "-";
+                    if (bar) {
+                        bar.style.width = '0%';
+                        bar.className = 'progress-bar';
+                    }
+                    return;
+                }
+
+                let score = 0;
+                if (password.length >= 8) score++;
+                if (/[A-Z]/.test(password)) score++;
+                if (/[a-z]/.test(password)) score++;
+                if (/[0-9]/.test(password)) score++;
+                if (/[^A-Za-z0-9]/.test(password)) score++;
+
+                let strength = "Weak";
+                let barClass = 'progress-bar bg-danger';
+                let barWidth = Math.max(5, (score * 20)) + '%';
+                
+                if (score >= 4) {
+                    strength = "Strong";
+                    barClass = 'progress-bar bg-success';
+                    barWidth = '100%';
+                } else if (score >= 2) {
+                    strength = "Medium";
+                    barClass = 'progress-bar bg-warning';
+                }
+
+                strengthLabel.innerText = strength;
+                if (bar) {
+                    bar.className = barClass;
+                    bar.style.width = barWidth;
+                }
+
+                // Update requirement indicators
+                const updateReq = (id, met) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.className = met ? 'text-success' : 'text-muted';
+                    }
+                };
+
+                updateReq('req-length', password.length >= 8);
+                updateReq('req-upper', /[A-Z]/.test(password));
+                updateReq('req-lower', /[a-z]/.test(password));
+                updateReq('req-number', /[0-9]/.test(password));
+                updateReq('req-symbol', /[^A-Za-z0-9]/.test(password));
+            };
+        })();
+
         $(function () {
             'use strict';
             let cropper;
@@ -264,24 +374,54 @@
                 });
             });
 
-            $('#profile-form, #security-form').on('submit', function (e) {
+            $(document).on('submit', '#profile-form, #security-form', function (e) {
                 e.preventDefault();
                 const form = $(this);
                 const btn = form.find('button[type="submit"]');
+                const isSecurity = form.attr('id') === 'security-form';
+                
+                // Clear errors
+                form.find('.text-danger').text('');
+                
                 btn.prop('disabled', true).text('Synchronizing...');
                 $.ajax({
                     url: "{{ route('admin.profile.update') }}",
                     method: "POST", data: form.serialize(),
                     success: function (response) {
-                        Swal.fire({ icon: 'success', title: 'System Synced', text: response.message, timer: 2000, showConfirmButton: false });
-                        if (form.attr('id') === 'security-form') form[0].reset();
+                        if (response.redirect) {
+                            Swal.fire({ 
+                                icon: 'success', 
+                                title: 'Security Updated', 
+                                text: response.message, 
+                                showConfirmButton: true 
+                            }).then(() => {
+                                window.location.href = response.redirect;
+                            });
+                        } else {
+                            Swal.fire({ icon: 'success', title: 'System Synced', text: response.message, timer: 2000, showConfirmButton: false });
+                        }
+                        if (isSecurity) form[0].reset();
                     },
                     error: function (xhr) {
-                        Swal.fire({ icon: 'error', title: 'Error', text: xhr.responseJSON.message || 'Failure.' });
+                        let errorMsg = 'Failure.';
+                        if (xhr.status === 422 && xhr.responseJSON.errors) {
+                            // Map errors to specific fields if they exist
+                            $.each(xhr.responseJSON.errors, function(field, messages) {
+                                $(`.error-${field}`).text(messages[0]);
+                            });
+                            errorMsg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        Swal.fire({ icon: 'error', title: 'Error', html: errorMsg });
                     },
-                    complete: function () { btn.prop('disabled', false).text('Update Profile'); }
+                    complete: function () { 
+                        btn.prop('disabled', false).text(isSecurity ? 'Update Password' : 'Update Profile'); 
+                    }
                 });
             });
+
+            // Forms are handled via AJAX
         });
     </script>
 @endpush

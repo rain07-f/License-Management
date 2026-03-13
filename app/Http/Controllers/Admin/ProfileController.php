@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
@@ -22,6 +25,40 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
+        // Case 1: Password Update
+        if ($request->filled('current_password') || $request->filled('password')) {
+            $request->validate([
+                'current_password' => ['required'],
+                'password' => [
+                    'required',
+                    'confirmed',
+                    Password::min(8)
+                        ->mixedCase()
+                        ->numbers()
+                        ->symbols()
+                ],
+            ]);
+
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'errors' => ['current_password' => ['Current password is incorrect.']]
+                ], 422);
+            }
+
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return response()->json([
+                'message' => 'Password updated successfully. Please login again.',
+                'redirect' => route('login')
+            ]);
+        }
+
+        // Case 2: Profile Update
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'full_name' => ['nullable', 'string', 'max:255'],
@@ -30,18 +67,7 @@ class ProfileController extends Controller
             'company' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'bio' => ['nullable', 'string', 'max:1000'],
-            'current_password' => ['nullable', 'required_with:new_password'],
-            'new_password' => ['nullable', 'min:8', 'confirmed'],
         ]);
-
-        if ($request->filled('current_password')) {
-            if (!Hash::check($request->current_password, $user->password)) {
-                return response()->json([
-                    'message' => 'The provided password does not match our records.'
-                ], 422);
-            }
-            $user->password = Hash::make($request->new_password);
-        }
 
         $user->fill($validated);
         $user->save();
