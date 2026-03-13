@@ -145,6 +145,7 @@
                                 <div class="tab-pane fade" id="security-settings" role="tabpanel">
                                     <form id="security-form" method="POST">
                                         @csrf
+                                        <input type="hidden" name="form_type" value="password">
                                         <div class="alert alert-fill-warning d-flex align-items-center mb-4 border-0">
                                             <i data-lucide="shield" class="icon-sm me-2"></i>
                                             <span>Update your password to enhance account security.</span>

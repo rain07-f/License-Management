@@ -23,40 +23,45 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        Log::info('Update request initiated. Form Type: ' . $request->input('form_type'), $request->all());
         $user = auth()->user();
 
         // Case 1: Password Update
-        if ($request->filled('current_password') || $request->filled('password')) {
-            $request->validate([
-                'current_password' => ['required'],
-                'password' => [
-                    'required',
-                    'confirmed',
-                    Password::min(8)
-                        ->mixedCase()
-                        ->numbers()
-                        ->symbols()
-                ],
-            ]);
-
-            if (!Hash::check($request->current_password, $user->password)) {
-                return response()->json([
-                    'errors' => ['current_password' => ['Current password is incorrect.']]
-                ], 422);
+        if ($request->input('form_type') === 'password') {
+            Log::info('Entering password update logic for user: ' . $user->email);
+            try {
+                $request->validate([
+                    'current_password' => ['required', 'current_password'],
+                    'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Validation failed for user ' . $user->id . ':', $e->errors());
+                throw $e;
             }
 
-            $user->password = Hash::make($request->password);
-            $user->save();
-
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            // Rely on the "hashed" cast in User model. 
+            // Setting it as a string will trigger the cast-hashing.
+            $user->password = $request->password;
+            
+            if ($user->save()) {
+                Log::info('Password saved successfully to database for user: ' . $user->id);
+                
+                // Secure other devices and update current session with new hash
+                Auth::logoutOtherDevices($request->password);
+                
+                // Re-authenticate to ensure session is crystal clear
+                Auth::login($user);
+                $request->session()->regenerate();
+            } else {
+                Log::error('FAILED to save password to database for user: ' . $user->id);
+            }
 
             return response()->json([
-                'message' => 'Password updated successfully. Please login again.',
-                'redirect' => route('login')
+                'message' => 'Password updated successfully! Other sessions secured.',
             ]);
         }
+        
+        Log::info('Falling back to profile update branch for user: ' . $user->email);
 
         // Case 2: Profile Update
         $validated = $request->validate([
