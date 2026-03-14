@@ -57,7 +57,20 @@ class LicenseController extends Controller
             $request->ip()
         );
 
-        return response()->json($result, $result['success'] ? 200 : 400);
+        if ($result['success']) {
+            return response()->json([
+                'valid' => true,
+                'plan' => $result['data']['plan'] ?? null,
+                'max_domains' => $result['data']['max_domains'] ?? 0,
+                'domains_used' => $result['data']['domains_used'] ?? 0,
+                'expires_at' => $result['data']['expires_at'] ?? null,
+            ], 200);
+        }
+
+        return response()->json([
+            'valid' => false,
+            'message' => $result['message'],
+        ], 400);
     }
 
     public function deactivate(Request $request)

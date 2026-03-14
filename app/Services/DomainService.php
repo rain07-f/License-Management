@@ -104,6 +104,7 @@ class DomainService
                 'expires_at' => $license->expires_at?->toIso8601String(),
                 'plan' => $license->plan->name,
                 'max_domains' => $license->max_domains,
+                'domains_used' => $license->domains()->count(),
             ]
         ];
     }
