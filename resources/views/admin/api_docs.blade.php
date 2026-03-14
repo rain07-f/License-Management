@@ -82,23 +82,23 @@
                     </div>
 
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
-                    <div class="bg-dark p-3 rounded">
+                    <div class="bg-dark p-3 rounded text-white">
                         <pre class="mb-0"><code>function activate_license($key, $domain) {
-                            $response = wp_remote_post('{{ url('/api/v1/license/activate') }}', [
-                                'headers' => [
-                                    'X-API-Key' => 'YOUR_SECRET_KEY'
-                                ],
-                                'body' => [
-                                    'license_key' => $key,
-                                    'domain'      => $domain
-                                ]
-                            ]);
+                                    $response = wp_remote_post('{{ url('/api/v1/license/activate') }}', [
+                                        'headers' => [
+                                            'X-API-Key' => 'YOUR_SECRET_KEY'
+                                        ],
+                                        'body' => [
+                                            'license_key' => $key,
+                                            'domain'      => $domain
+                                        ]
+                                    ]);
 
-                            if (is_wp_error($response)) return false;
+                                    if (is_wp_error($response)) return false;
 
-                            $body = json_decode(wp_remote_retrieve_body($response), true);
-                            return $body['success'] ?? false;
-                        }</code></pre>
+                                    $body = json_decode(wp_remote_retrieve_body($response), true);
+                                    return $body['success'] ?? false;
+                                }</code></pre>
                     </div>
                 </div>
             </section>
@@ -115,26 +115,26 @@
                     </div>
 
                     <h6 class="tx-14 fw-bolder mb-2">PHP Implementation Example</h6>
-                    <div class="bg-dark p-3 rounded">
+                    <div class="bg-dark p-3 rounded text-white">
                         <pre class="mb-0"><code>function validate_license($key, $domain) {
-                            $response = wp_remote_post('{{ url('/api/v1/license/validate') }}', [
-                                'headers' => [
-                                    'X-API-Key' => 'YOUR_SECRET_KEY'
-                                ],
-                                'body' => [
-                                    'license_key' => $key,
-                                    'domain'      => $domain
-                                ]
-                            ]);
+                                    $response = wp_remote_post('{{ url('/api/v1/license/validate') }}', [
+                                        'headers' => [
+                                            'X-API-Key' => 'YOUR_SECRET_KEY'
+                                        ],
+                                        'body' => [
+                                            'license_key' => $key,
+                                            'domain'      => $domain
+                                        ]
+                                    ]);
 
-                            $body = json_decode(wp_remote_retrieve_body($response), true);
+                                    $body = json_decode(wp_remote_retrieve_body($response), true);
 
-                            if (isset($body['success']) && $body['success']) {
-                                return true;
-                            }
+                                    if (isset($body['success']) && $body['success']) {
+                                        return true;
+                                    }
 
-                            return false;
-                        }</code></pre>
+                                    return false;
+                                }</code></pre>
                     </div>
                 </div>
             </section>

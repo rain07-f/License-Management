@@ -18,8 +18,9 @@
                             <p class="text-muted small d-block d-md-none mt-1">Manage your service offerings</p>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm flex-fill flex-md-grow-0" data-bs-toggle="modal"
-                                data-bs-target="#quickAddPlanModal">
+                            <button type="button"
+                                class="btn btn-primary rounded-pill px-4 shadow-sm flex-fill flex-md-grow-0"
+                                data-bs-toggle="modal" data-bs-target="#quickAddPlanModal">
                                 <i data-lucide="plus" class="me-1 icon-sm"></i> Quick Add
                             </button>
                             <a href="{{ route('admin.plans.create') }}"
@@ -48,7 +49,8 @@
                                             <small class="text-secondary d-block mt-1">{{ $plan->description }}</small>
                                         </td>
                                         <td data-label="Price">
-                                            <span class="fw-bolder fs-5 text-light">${{ number_format($plan->price, 2) }}</span>
+                                            <span
+                                                class="fw-bolder fs-5 text-primary">${{ number_format($plan->price, 2) }}</span>
                                         </td>
                                         <td data-label="Duration">
                                             <span class="badge bg-info-subtle text-info">{{ $plan->duration_days }} Days</span>
@@ -156,43 +158,43 @@
                     const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(plan.price);
 
                     return `
-                                                    <tr id="planRow-${plan.id}">
-                                                        <td data-label="Plan Name">
-                                                            <div class="fw-bold text-primary">${plan.name}</div>
-                                                            <small class="text-secondary d-block mt-1">${plan.description}</small>
-                                                        </td>
-                                                        <td data-label="Price">
-                                                            <span class="fw-bolder fs-5 text-dark">${formattedPrice}</span>
-                                                        </td>
-                                                        <td data-label="Duration">
-                                                            <span class="badge bg-info-subtle text-info">${plan.duration_days} Days</span>
-                                                        </td>
-                                                        <td data-label="Domain Limit">
-                                                            <span class="badge bg-primary-subtle text-primary">${plan.domain_limit} Domains</span>
-                                                        </td>
-                                                        <td class="px-4 py-3 text-end">
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
-                                                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
-                                                                    Action
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
-                                                                    <li><a class="dropdown-item py-2" href="/admin/plans/${plan.id}/edit"><i
-                                                                                data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
-                                                                    <li><hr class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <form class="planDeleteForm" action="/admin/plans/${plan.id}" method="POST">
-                                                                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
-                                                                            <input type="hidden" name="_method" value="DELETE">
-                                                                            <button type="submit" class="dropdown-item py-2 text-danger"><i
-                                                                                    data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
-                                                                        </form>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                `;
+                                                                    <tr id="planRow-${plan.id}">
+                                                                        <td data-label="Plan Name">
+                                                                            <div class="fw-bold text-primary">${plan.name}</div>
+                                                                            <small class="text-secondary d-block mt-1">${plan.description}</small>
+                                                                        </td>
+                                                                        <td data-label="Price">
+                                                                            <span class="fw-bolder fs-5 text-dark">${formattedPrice}</span>
+                                                                        </td>
+                                                                        <td data-label="Duration">
+                                                                            <span class="badge bg-info-subtle text-info">${plan.duration_days} Days</span>
+                                                                        </td>
+                                                                        <td data-label="Domain Limit">
+                                                                            <span class="badge bg-primary-subtle text-primary">${plan.domain_limit} Domains</span>
+                                                                        </td>
+                                                                        <td class="px-4 py-3 text-end">
+                                                                            <div class="dropdown">
+                                                                                <button class="btn btn-light btn-sm rounded-pill px-3 dropdown-toggle shadow-none border-0"
+                                                                                    type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                                                    Action
+                                                                                </button>
+                                                                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-1">
+                                                                                    <li><a class="dropdown-item py-2" href="/admin/plans/${plan.id}/edit"><i
+                                                                                                data-lucide="edit-2" class="me-2 icon-sm opacity-50"></i> Edit</a></li>
+                                                                                    <li><hr class="dropdown-divider"></li>
+                                                                                    <li>
+                                                                                        <form class="planDeleteForm" action="/admin/plans/${plan.id}" method="POST">
+                                                                                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                                                            <input type="hidden" name="_method" value="DELETE">
+                                                                                            <button type="submit" class="dropdown-item py-2 text-danger"><i
+                                                                                                    data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
+                                                                                        </form>
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                `;
                 }
 
                 // AJAX Create
@@ -253,9 +255,11 @@
                     overflow-x: visible !important;
                     border: 0;
                 }
+
                 .table thead {
                     display: none;
                 }
+
                 .table tr {
                     display: block;
                     margin-bottom: 1.25rem;
@@ -265,6 +269,7 @@
                     background: rgba(var(--bs-dark-rgb), 0.15);
                     box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
                 }
+
                 .table td {
                     display: flex;
                     flex-direction: column;
@@ -274,6 +279,7 @@
                     text-align: left;
                     width: 100%;
                 }
+
                 .table td:before {
                     content: attr(data-label);
                     font-weight: 700;
@@ -284,6 +290,7 @@
                     margin-bottom: 0.25rem;
                     opacity: 0.8;
                 }
+
                 .table td:last-child {
                     border-top: 1px solid var(--bs-border-color);
                     padding-top: 1rem;
@@ -291,14 +298,16 @@
                     display: block;
                     text-align: right;
                 }
+
                 .table td:last-child:before {
                     display: none;
                 }
-                
+
                 /* Layout adjustments to ensure no overflow */
                 .card-body {
                     padding: 1rem;
                 }
+
                 .page-breadcrumb {
                     margin-bottom: 1.5rem;
                 }

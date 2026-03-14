@@ -16,6 +16,24 @@
         </form>
 
         <ul class="navbar-nav">
+            <!-- Theme Toggle Button -->
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="theme-toggle" title="Toggle Theme">
+                    <script>
+                        // Synchronous script to immediately output the right icon to avoid flicker
+                        (function() {
+                            const initialTheme = localStorage.getItem('admin-theme') || 'dark';
+                            // If dark mode, show sun. If light mode, show moon.
+                            if (initialTheme === 'dark') {
+                                document.write('<i id="theme-icon" data-lucide="sun"></i>');
+                            } else {
+                                document.write('<i id="theme-icon" data-lucide="moon"></i>');
+                            }
+                        })();
+                    </script>
+                </a>
+            </li>
+
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
