@@ -29,16 +29,16 @@ class ProfileController extends Controller
         if ($request->input('form_type') === 'password') {
             $request->validate([
                 'current_password' => ['required', 'current_password'],
-                'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()],
+                'password' => ['required', 'confirmed', Password::min(8)->mixedCase()->numbers()->symbols()],
             ]);
 
             // Rely on the "hashed" cast in User model
             $user->password = $request->password;
-            
+
             if ($user->save()) {
                 // Secure other devices and update current session with new hash
                 Auth::logoutOtherDevices($request->password);
-                
+
                 Auth::login($user);
                 $request->session()->regenerate();
 

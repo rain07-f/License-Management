@@ -189,7 +189,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mb-3 p-3 bg-light rounded border">
+                                        <div class="mb-3 p-3 bg-dark rounded border">
                                             <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">Password Requirements:</label>
                                             <ul class="tx-12 text-muted mb-0 ps-3">
                                                 <li id="req-length">• Minimum 8 characters</li>
