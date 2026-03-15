@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Plan;
+use App\Models\Application;
 
 class PlanController extends Controller
 {
     public function index()
     {
-        $plans = Plan::latest()->paginate(10);
-        return view('admin.plans.index', compact('plans'));
+        $plans = Plan::with('application')->latest()->paginate(10);
+        $applications = Application::all();
+        return view('admin.plans.index', compact('plans', 'applications'));
     }
 
     public function create()
@@ -28,6 +30,7 @@ class PlanController extends Controller
             'duration_days' => 'required|integer|min:1',
             'domain_limit' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
+            'application_id' => 'nullable|exists:applications,id',
         ]);
 
         $plan = Plan::create($request->all());
@@ -56,6 +59,7 @@ class PlanController extends Controller
             'duration_days' => 'required|integer|min:1',
             'domain_limit' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
+            'application_id' => 'nullable|exists:applications,id',
         ]);
 
         $plan->update($request->all());
@@ -83,5 +87,25 @@ class PlanController extends Controller
         }
 
         return redirect()->route('admin.plans.index')->with('success', 'Plan deleted successfully.');
+    }
+
+    /**
+     * AJAX: Get plans filtered by application.
+     */
+    public function byApplication(Application $application)
+    {
+        return response()->json(
+            $application->plans()->where('active', true)->get(['id', 'name'])
+        );
+    }
+
+    /**
+     * AJAX: Get general plans (no application).
+     */
+    public function general()
+    {
+        return response()->json(
+            Plan::whereNull('application_id')->where('active', true)->get(['id', 'name'])
+        );
     }
 }

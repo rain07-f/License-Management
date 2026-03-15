@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\License;
 use App\Models\User;
 use App\Models\Plan;
+use App\Models\Application;
 use App\Services\LicenseService;
 use Exception;
 
@@ -23,7 +24,7 @@ class LicenseController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = License::with(['owner', 'plan', 'generator']);
+        $query = License::with(['owner', 'plan.application', 'generator']);
 
         if (!$user->isSuperAdmin()) {
             $query->where(function ($q) use ($user) {
@@ -43,14 +44,15 @@ class LicenseController extends Controller
         }
 
         $licenses = $query->latest()->paginate(10)->withQueryString();
-        $plans = Plan::all();
+        $plans = Plan::with('application')->get();
+        $applications = Application::all();
         $clients = [];
         if (auth()->user()->isSuperAdmin()) {
             $clients = User::where('role', 'client')->get();
         } else {
             $clients = User::where('parent_id', auth()->id())->where('role', 'client')->get();
         }
-        return view('admin.licenses.index', compact('licenses', 'plans', 'clients'));
+        return view('admin.licenses.index', compact('licenses', 'plans', 'clients', 'applications'));
     }
 
     public function export()
@@ -167,7 +169,7 @@ class LicenseController extends Controller
             abort(403);
         }
 
-        $license->load(['owner', 'plan', 'generator', 'logs.user']);
+        $license->load(['owner', 'plan.application', 'generator', 'logs.user']);
         
         $domains = $license->domains()->latest()->paginate(5, ['*'], 'domains_page');
         $logs = $license->logs()->with('user')->latest()->paginate(10, ['*'], 'logs_page');
@@ -253,4 +255,5 @@ class LicenseController extends Controller
 
         return redirect()->route('admin.licenses.index')->with('success', 'License deleted.');
     }
+
 }

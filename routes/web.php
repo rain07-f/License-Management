@@ -37,6 +37,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::post('/licenses/{license}/reactivate', [LicenseController::class, 'reactivate'])->name('licenses.reactivate');
         Route::post('/licenses/{license}/renew', [LicenseController::class, 'renew'])->name('licenses.renew');
+        Route::get('/plans/by-application/{application}', [PlanController::class, 'byApplication'])->name('plans.byApplication');
+        Route::get('/plans/general', [PlanController::class, 'general'])->name('plans.general');
     });
 
     Route::resource('licenses', LicenseController::class)->only(['index', 'show']);
@@ -72,11 +74,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('applications', \App\Http\Controllers\ApplicationController::class);
         Route::resource('application-versions', \App\Http\Controllers\ApplicationVersionController::class)
             ->only(['store', 'destroy']);
-        Route::post('/api-keys/{apiKey}/activate', [\App\Http\Controllers\Admin\ApiKeyController::class, 'activate'])->name('api-keys.activate');
-        Route::delete('/api-keys/{apiKey}/permanent-delete', [\App\Http\Controllers\Admin\ApiKeyController::class, 'permanentDelete'])->name('api-keys.permanent-delete');
-        Route::post('/api-keys/{apiKey}/reveal', [\App\Http\Controllers\Admin\ApiKeyController::class, 'reveal'])
-            ->name('api-keys.reveal')
-            ->middleware('throttle:3,1');
+
     });
 
     Route::middleware(['role:super_admin,distributor'])->group(function () {

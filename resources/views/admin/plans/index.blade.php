@@ -139,6 +139,15 @@
                             <label class="form-label small fw-medium">Domain Limit</label>
                             <input type="number" name="domain_limit" class="form-control" min="1" value="1" required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">Application (Optional)</label>
+                            <select name="application_id" class="form-select">
+                                <option value="">No Application</option>
+                                @foreach($applications as $app)
+                                    <option value="{{ $app->id }}">{{ $app->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer border-0 p-4 pt-0">
                         <button type="button" class="btn btn-light rounded-pill px-4"
@@ -153,6 +162,9 @@
     @push('custom-scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                var $ = window.jQuery || window.$;
+                var csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
                 // Helper to build row HTML
                 function buildPlanRow(plan) {
                     const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(plan.price);
@@ -184,7 +196,7 @@
                                                                                     <li><hr class="dropdown-divider"></li>
                                                                                     <li>
                                                                                         <form class="planDeleteForm" action="/admin/plans/${plan.id}" method="POST">
-                                                                                            <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                                                            <input type="hidden" name="_token" value="${csrfToken}">
                                                                                             <input type="hidden" name="_method" value="DELETE">
                                                                                             <button type="submit" class="dropdown-item py-2 text-danger"><i
                                                                                                     data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete</button>
@@ -197,54 +209,58 @@
                                                                 `;
                 }
 
-                // AJAX Create
-                $(document).on('submit', '#quickAddPlanForm', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let btn = form.find('button[type=submit]');
-                    let modal = bootstrap.Modal.getInstance(document.getElementById('quickAddPlanModal'));
+                // AJAX handlers — only if jQuery loaded
+                if ($) {
+                    // AJAX Create
+                    $(document).on('submit', '#quickAddPlanForm', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var btn = form.find('button[type=submit]');
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('quickAddPlanModal'));
 
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: form.serialize(),
-                        beforeSend: function () {
-                            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Creating...');
-                        },
-                        success: function (res) {
-                            if (res.success) {
-                                form[0].reset();
-                                modal.hide();
-                                const newRow = buildPlanRow(res.data);
-                                $('#plansTableBody').prepend(newRow);
-                                if (window.lucide) lucide.createIcons();
-                            }
-                        },
-                        complete: function () {
-                            btn.prop('disabled', false).text('Create Plan');
-                        }
-                    });
-                });
-
-                // AJAX Delete
-                $(document).on('submit', '.planDeleteForm', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let row = form.closest('tr');
-
-                    if (confirm('Are you sure you want to delete this plan?')) {
                         $.ajax({
                             url: form.attr('action'),
                             method: 'POST',
                             data: form.serialize(),
+                            beforeSend: function () {
+                                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Creating...');
+                            },
                             success: function (res) {
                                 if (res.success) {
-                                    row.fadeOut(300, function () { $(this).remove(); });
+                                    form[0].reset();
+                                    modal.hide();
+                                    var newRow = buildPlanRow(res.data);
+                                    var tbody = document.getElementById('plansTableBody');
+                                    if (tbody) tbody.insertAdjacentHTML('afterbegin', newRow);
+                                    if (window.lucide) lucide.createIcons();
                                 }
+                            },
+                            complete: function () {
+                                btn.prop('disabled', false).text('Create Plan');
                             }
                         });
-                    }
-                });
+                    });
+
+                    // AJAX Delete
+                    $(document).on('submit', '.planDeleteForm', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var row = form.closest('tr');
+
+                        if (confirm('Are you sure you want to delete this plan?')) {
+                            $.ajax({
+                                url: form.attr('action'),
+                                method: 'POST',
+                                data: form.serialize(),
+                                success: function (res) {
+                                    if (res.success) {
+                                        row.fadeOut(300, function () { $(this).remove(); });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } // end if ($)
             });
         </script>
     @endpush

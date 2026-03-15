@@ -38,6 +38,7 @@
                         <tr>
                             <th class="px-4 py-3">License Key Display</th>
                             <th class="py-3">Owner</th>
+                            <th class="py-3">Application</th>
                             <th class="py-3">Plan</th>
                             <th class="py-3">Status</th>
                             <th class="py-3 text-center">Domains</th>
@@ -59,6 +60,9 @@
                                 <td class="py-3">
                                     <h6 class="mb-0 fw-semibold">{{ $license->owner->name }}</h6>
                                     <small class="text-muted">{{ $license->owner->role }}</small>
+                                </td>
+                                <td class="py-3">
+                                    <span class="badge bg-primary-subtle text-primary px-2">{{ $license->plan->application->name ?? '—' }}</span>
                                 </td>
                                 <td class="py-3">
                                     <span class="fw-bold">{{ $license->plan->name }}</span>
@@ -196,17 +200,21 @@
                     </div>
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label small fw-medium">Select Plan</label>
-                            <select name="plan_id" class="form-select" required>
-                                <option value="">Select a plan</option>
-                                @foreach($plans as $plan)
-                                    <option value="{{ $plan->id }}">{{ $plan->name }} (${{ $plan->price }})</option>
+                            <label for="application_id" class="form-label small fw-medium">Select Application</label>
+                            <select id="application_id" class="form-control">
+                                <option value="">-- General License --</option>
+                                @foreach($applications as $app)
+                                    <option value="{{ $app->id }}">{{ $app->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-medium">Assign to Client (Optional)</label>
-                            <select name="owner_id" class="form-select">
+                            <label for="plan_id" class="form-label small fw-medium">Select Plan</label>
+                            <select name="plan_id" id="plan_id" class="form-control" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="client_id" class="form-label small fw-medium">Assign Client</label>
+                            <select name="owner_id" id="client_id" class="form-control">
                                 <option value="">Generate for Myself</option>
                                 @foreach($clients as $client)
                                     <option value="{{ $client->id }}">{{ $client->name }} ({{ $client->email }})</option>
@@ -249,6 +257,9 @@
     @push('custom-scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+                var $ = window.jQuery || window.$;
+                var csrfToken = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
                 // Helper to build row HTML
                 function buildLicenseRow(license) {
                     const statusClasses = {
@@ -261,6 +272,7 @@
                     const ownerName = license.owner ? license.owner.name : 'Unknown';
                     const ownerRole = license.owner ? license.owner.role : '';
                     const planName = license.plan ? license.plan.name : 'Unknown';
+                    const appName = (license.plan && license.plan.application) ? license.plan.application.name : '—';
                     const expiresAt = license.expires_at ? new Date(license.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never';
                     const domainsCount = license.domains ? license.domains.length : 0;
 
@@ -275,7 +287,7 @@
                                                     data-lucide="refresh-cw" class="me-2 icon-sm opacity-50"></i> Change Plan</a></li>
                                         <li>
                                             <form class="licenseFormRevoke" action="/admin/licenses/${license.id}/revoke" method="POST">
-                                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                <input type="hidden" name="_token" value="${csrfToken}">
                                                 <button type="submit" class="dropdown-item py-2 text-danger"><i
                                                         data-lucide="slash" class="me-2 icon-sm opacity-50"></i> Revoke License</button>
                                             </form>
@@ -285,14 +297,14 @@
                         actions = `
                                         <li>
                                             <form class="licenseFormReactivate" action="/admin/licenses/${license.id}/reactivate" method="POST">
-                                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                <input type="hidden" name="_token" value="${csrfToken}">
                                                 <button type="submit" class="dropdown-item py-2 text-success"><i
                                                         data-lucide="play-circle" class="me-2 icon-sm opacity-50"></i> Reactivate</button>
                                             </form>
                                         </li>
                                         <li>
                                             <form class="licenseFormDelete" action="/admin/licenses/${license.id}" method="POST">
-                                                <input type="hidden" name="_token" value="${$('meta[name="csrf-token"]').attr('content')}">
+                                                <input type="hidden" name="_token" value="${csrfToken}">
                                                 <input type="hidden" name="_method" value="DELETE">
                                                 <button type="submit" class="dropdown-item py-2 text-danger"><i
                                                         data-lucide="trash-2" class="me-2 icon-sm opacity-50"></i> Delete Permanently</button>
@@ -313,6 +325,9 @@
                                         <td class="py-3">
                                             <h6 class="mb-0 fw-semibold">${ownerName}</h6>
                                             <small class="text-muted">${ownerRole}</small>
+                                        </td>
+                                        <td class="py-3">
+                                            <span class="badge bg-primary-subtle text-primary px-2">${appName}</span>
                                         </td>
                                         <td class="py-3">
                                             <span class="fw-bold">${planName}</span>
@@ -342,141 +357,209 @@
                                 `;
                 }
 
-                // AJAX Generate
-                $(document).on('submit', '#quickGenerateForm', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let btn = form.find('button[type=submit]');
-                    let modal = bootstrap.Modal.getInstance(document.getElementById('quickGenerateModal'));
+                // AJAX handlers — only if jQuery loaded
+                if ($) {
+                    // AJAX Generate
+                    $(document).on('submit', '#quickGenerateForm', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var btn = form.find('button[type=submit]');
+                        var modal = bootstrap.Modal.getInstance(document.getElementById('quickGenerateModal'));
 
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: form.serialize(),
-                        beforeSend: function () {
-                            btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Generating...');
-                        },
-                        success: function (res) {
-                            if (res.success) {
-                                form[0].reset();
-                                modal.hide();
-
-                                // Prepend row
-                                const newRow = buildLicenseRow(res.data);
-                                $('#licensesTableBody').prepend(newRow);
-                                if (window.lucide) lucide.createIcons();
-
-                                // Show result
-                                $('#newLicenseKey').text(res.display_key);
-                                const resultModal = new bootstrap.Modal(document.getElementById('licenseResultModal'));
-                                resultModal.show();
+                        $.ajax({
+                            url: form.attr('action'),
+                            method: 'POST',
+                            data: form.serialize(),
+                            beforeSend: function () {
+                                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Generating...');
+                            },
+                            success: function (res) {
+                                if (res.success) {
+                                    form[0].reset();
+                                    modal.hide();
+                                    var newRow = buildLicenseRow(res.data);
+                                    var tbody = document.getElementById('licensesTableBody');
+                                    if (tbody) tbody.insertAdjacentHTML('afterbegin', newRow);
+                                    if (window.lucide) lucide.createIcons();
+                                    var keyEl = document.getElementById('newLicenseKey');
+                                    if (keyEl) keyEl.textContent = res.display_key;
+                                    var resultModal = new bootstrap.Modal(document.getElementById('licenseResultModal'));
+                                    resultModal.show();
+                                }
+                            },
+                            error: function (xhr) {
+                                alert('Failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+                            },
+                            complete: function () {
+                                btn.prop('disabled', false).text('Generate');
                             }
-                        },
-                        error: function (xhr) {
-                            alert('Failed: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
-                        },
-                        complete: function () {
-                            btn.prop('disabled', false).text('Generate');
-                        }
+                        });
                     });
-                });
 
-                // AJAX Transfer
-                $(document).on('submit', '.licenseFormTransfer', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let modal = form.closest('.modal');
-                    let bootstrapModal = bootstrap.Modal.getInstance(modal[0]);
-
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: form.serialize(),
-                        success: function (res) {
-                            if (res.success) {
-                                bootstrapModal.hide();
-                                const updatedRow = buildLicenseRow(res.data);
-                                $(`#licenseRow-${res.data.id}`).replaceWith(updatedRow);
-                                if (window.lucide) lucide.createIcons();
-                            }
-                        }
-                    });
-                });
-
-                // AJAX Revoke (same as before)
-                $(document).on('submit', '.licenseFormRevoke', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let row = form.closest('tr');
-
-                    if (confirm('Are you sure you want to revoke this license?')) {
+                    // AJAX Transfer
+                    $(document).on('submit', '.licenseFormTransfer', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var modal = form.closest('.modal');
+                        var bootstrapModal = bootstrap.Modal.getInstance(modal[0]);
                         $.ajax({
                             url: form.attr('action'),
                             method: 'POST',
                             data: form.serialize(),
                             success: function (res) {
                                 if (res.success) {
-                                    const updatedRow = buildLicenseRow(res.data);
-                                    row.replaceWith(updatedRow);
+                                    bootstrapModal.hide();
+                                    var oldRow = document.getElementById('licenseRow-' + res.data.id);
+                                    if (oldRow) oldRow.outerHTML = buildLicenseRow(res.data);
                                     if (window.lucide) lucide.createIcons();
                                 }
                             }
                         });
-                    }
-                });
+                    });
 
-                // AJAX Reactivate
-                $(document).on('submit', '.licenseFormReactivate', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let row = form.closest('tr');
-
-                    $.ajax({
-                        url: form.attr('action'),
-                        method: 'POST',
-                        data: form.serialize(),
-                        success: function (res) {
-                            if (res.success) {
-                                const updatedRow = buildLicenseRow(res.data);
-                                row.replaceWith(updatedRow);
-                                if (window.lucide) lucide.createIcons();
-                            }
+                    // AJAX Revoke
+                    $(document).on('submit', '.licenseFormRevoke', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var row = form.closest('tr');
+                        if (confirm('Are you sure you want to revoke this license?')) {
+                            $.ajax({
+                                url: form.attr('action'),
+                                method: 'POST',
+                                data: form.serialize(),
+                                success: function (res) {
+                                    if (res.success) {
+                                        row.replaceWith(buildLicenseRow(res.data));
+                                        if (window.lucide) lucide.createIcons();
+                                    }
+                                }
+                            });
                         }
                     });
-                });
 
-                // AJAX Delete
-                $(document).on('submit', '.licenseFormDelete', function (e) {
-                    e.preventDefault();
-                    let form = $(this);
-                    let row = form.closest('tr');
-
-                    if (confirm('Are you sure you want to PERMANENTLY delete this license? This cannot be undone.')) {
+                    // AJAX Reactivate
+                    $(document).on('submit', '.licenseFormReactivate', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var row = form.closest('tr');
                         $.ajax({
                             url: form.attr('action'),
                             method: 'POST',
                             data: form.serialize(),
                             success: function (res) {
                                 if (res.success) {
-                                    row.fadeOut(300, function () { $(this).remove(); });
+                                    row.replaceWith(buildLicenseRow(res.data));
+                                    if (window.lucide) lucide.createIcons();
                                 }
                             }
                         });
-                    }
-                });
-
-                // Copy logic
-                $('#copyLicenseKey').on('click', function () {
-                    const key = $('#newLicenseKey').text();
-                    navigator.clipboard.writeText(key).then(() => {
-                        $(this).html('<i data-lucide="check" class="me-2 icon-sm"></i> Copied!').removeClass('btn-primary').addClass('btn-success');
-                        if (window.lucide) lucide.createIcons();
-                        setTimeout(() => {
-                            $(this).html('<i data-lucide="copy" class="me-2 icon-sm"></i> Copy to Clipboard').removeClass('btn-success').addClass('btn-primary');
-                            if (window.lucide) lucide.createIcons();
-                        }, 2000);
                     });
-                });
+
+                    // AJAX Delete
+                    $(document).on('submit', '.licenseFormDelete', function (e) {
+                        e.preventDefault();
+                        var form = $(this);
+                        var row = form.closest('tr');
+                        if (confirm('Are you sure you want to PERMANENTLY delete this license? This cannot be undone.')) {
+                            $.ajax({
+                                url: form.attr('action'),
+                                method: 'POST',
+                                data: form.serialize(),
+                                success: function (res) {
+                                    if (res.success) {
+                                        row.fadeOut(300, function () { $(this).remove(); });
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    // Copy logic
+                    $(document).on('click', '#copyLicenseKey', function () {
+                        var key = document.getElementById('newLicenseKey').textContent;
+                        var btn = $(this);
+                        navigator.clipboard.writeText(key).then(function () {
+                            btn.html('<i data-lucide="check" class="me-2 icon-sm"></i> Copied!').removeClass('btn-primary').addClass('btn-success');
+                            if (window.lucide) lucide.createIcons();
+                            setTimeout(function () {
+                                btn.html('<i data-lucide="copy" class="me-2 icon-sm"></i> Copy to Clipboard').removeClass('btn-success').addClass('btn-primary');
+                                if (window.lucide) lucide.createIcons();
+                            }, 2000);
+                        });
+                    });
+                } // end if ($)
+
+                // ============================================================
+                // Application → Plan filtering (Pure Vanilla JS)
+                // ============================================================
+                const appSelect = document.getElementById('application_id');
+                const planSelect = document.getElementById('plan_id');
+
+                if (appSelect && planSelect) {
+                    appSelect.addEventListener('change', function () {
+                        const appId = this.value;
+                        planSelect.innerHTML = ''; // clear existing options
+
+                        let url = appId 
+                            ? `/admin/plans/by-application/${appId}` 
+                            : `/admin/plans/general`;
+
+                        fetch(url)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (!data.length) {
+                                    const opt = document.createElement('option');
+                                    opt.value = '';
+                                    opt.textContent = 'No plans available';
+                                    planSelect.appendChild(opt);
+                                    return;
+                                }
+                                data.forEach(plan => {
+                                    const option = document.createElement('option');
+                                    option.value = plan.id;
+                                    option.textContent = plan.name;
+                                    planSelect.appendChild(option);
+                                });
+                            })
+                            .catch(() => console.error('Failed to load plans'));
+                    });
+
+                    // Trigger initial load for General License mode
+                    const initialAppId = appSelect.value;
+                    const initialUrl = initialAppId ? `/admin/plans/by-application/${initialAppId}` : `/admin/plans/general`;
+                    
+                    // Small helper for initial/reset fetch
+                    const initFetch = (url) => {
+                        fetch(url)
+                            .then(res => res.json())
+                            .then(data => {
+                                planSelect.innerHTML = '';
+                                if (!data.length) {
+                                    const opt = document.createElement('option');
+                                    opt.value = '';
+                                    opt.textContent = 'No plans available';
+                                    planSelect.appendChild(opt);
+                                    return;
+                                }
+                                data.forEach(plan => {
+                                    const option = document.createElement('option');
+                                    option.value = plan.id;
+                                    option.textContent = plan.name;
+                                    planSelect.appendChild(option);
+                                });
+                            });
+                    };
+                    initFetch(initialUrl);
+
+                    // Reset modal logic
+                    const quickGenModal = document.getElementById('quickGenerateModal');
+                    if (quickGenModal) {
+                        quickGenModal.addEventListener('hidden.bs.modal', function () {
+                            appSelect.value = '';
+                            initFetch('/admin/plans/general');
+                        });
+                    }
+                }
             });
         </script>
     @endpush

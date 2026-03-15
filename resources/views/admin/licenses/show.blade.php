@@ -74,6 +74,10 @@
 
                             <div class="row g-4 mb-5">
                                 <div class="col-md-4">
+                                    <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Application</label>
+                                    <span class="fw-bold">{{ $license->plan->application->name ?? '—' }}</span>
+                                </div>
+                                <div class="col-md-4">
                                     <label class="tx-11 fw-bolder mb-1 text-uppercase text-muted d-block">Plan</label>
                                     <span class="fw-bold">{{ $license->plan->name }}</span>
                                 </div>

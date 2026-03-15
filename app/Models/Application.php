@@ -21,4 +21,9 @@ class Application extends Model
     {
         return $this->hasOne(ApplicationVersion::class)->latestOfMany();
     }
+
+    public function plans()
+    {
+        return $this->hasMany(Plan::class);
+    }
 }

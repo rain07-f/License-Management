@@ -43,6 +43,18 @@
                                 <span>License Deactivation</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="#update-check" class="nav-link text-body d-flex align-items-center px-0">
+                                <i data-lucide="refresh-cw" class="icon-sm me-2"></i>
+                                <span>Update Check</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#download" class="nav-link text-body d-flex align-items-center px-0">
+                                <i data-lucide="download" class="icon-sm me-2"></i>
+                                <span>Download Package</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -152,6 +164,64 @@
                     <div class="alert alert-fill-info d-flex align-items-center">
                         <i data-lucide="info" class="icon-md me-2"></i>
                         <span class="tx-12">Use this when the user uninstalls your application to free up a slot.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Update Check Section -->
+            <section id="update-check" class="card grid-margin stretch-card">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">Update Check</h6>
+                    <p class="text-secondary tx-13 mb-3">Check if a newer version of the application is available.</p>
+
+                    <div class="bg-dark rounded p-3 mb-4">
+                        <code class="text-white">GET /license/update-check</code>
+                    </div>
+
+                    <h6 class="tx-14 fw-bolder mb-2">Request Parameters</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Key</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>license_key</code></td><td>The user's license key.</td></tr>
+                                <tr><td><code>domain</code></td><td>The current domain.</td></tr>
+                                <tr><td><code>application_slug</code></td><td>The slug of your application (e.g. <code>my-plugin</code>).</td></tr>
+                                <tr><td><code>current_version</code></td><td>The currently installed version (e.g. <code>1.0.0</code>).</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h6 class="tx-14 fw-bolder mb-2">Success Response</h6>
+                    <div class="bg-dark p-3 rounded text-white mb-4">
+                        <pre class="mb-0"><code>{
+    "success": true,
+    "update_available": true,
+    "new_version": "1.2.0",
+    "download_url": "https://...",
+    "release_notes": "Added new features..."
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section id="download" class="card grid-margin stretch-card">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">Download Package</h6>
+                    <p class="text-secondary tx-13 mb-3">Download the latest update package securely.</p>
+
+                    <div class="bg-dark rounded p-3 mb-4">
+                        <code class="text-white">GET /license/download</code>
+                    </div>
+
+                    <div class="alert alert-fill-warning d-flex align-items-center">
+                        <i data-lucide="help-circle" class="icon-md me-2"></i>
+                        <span class="tx-12">This endpoint requires the same parameters as Update Check + <code>version</code>.</span>
                     </div>
                 </div>
             </section>

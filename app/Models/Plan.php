@@ -12,7 +12,13 @@ class Plan extends Model
         'duration_days',
         'domain_limit',
         'price',
+        'application_id',
     ];
+
+    public function application()
+    {
+        return $this->belongsTo(Application::class);
+    }
 
     public function licenses()
     {
