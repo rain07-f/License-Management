@@ -39,27 +39,25 @@
                             <div class="col-12 col-md-3">
                                 <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date From</label>
                                 <div class="input-group datepicker-wrap" id="date_from_wrap">
-                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
+                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer"
+                                        data-toggle>
                                         <i data-lucide="calendar" class="icon-sm text-secondary"></i>
                                     </span>
-                                    <input type="text" name="date_from" id="date_from" 
-                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" 
-                                        data-input
-                                        placeholder="YYYY-MM-DD" 
-                                        value="{{ request('date_from') }}">
+                                    <input type="text" name="date_from" id="date_from"
+                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" data-input
+                                        placeholder="YYYY-MM-DD" value="{{ request('date_from') }}">
                                 </div>
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label tx-11 fw-bold text-uppercase text-secondary">Date To</label>
                                 <div class="input-group datepicker-wrap" id="date_to_wrap">
-                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer" data-toggle>
+                                    <span class="input-group-text bg-transparent border-end-0 py-1 px-2 cursor-pointer"
+                                        data-toggle>
                                         <i data-lucide="calendar" class="icon-sm text-secondary"></i>
                                     </span>
-                                    <input type="text" name="date_to" id="date_to" 
-                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" 
-                                        data-input
-                                        placeholder="YYYY-MM-DD" 
-                                        value="{{ request('date_to') }}">
+                                    <input type="text" name="date_to" id="date_to"
+                                        class="form-control form-control-sm shadow-none border-start-0 ps-0" data-input
+                                        placeholder="YYYY-MM-DD" value="{{ request('date_to') }}">
                                 </div>
                             </div>
                             <div class="col-12 col-md-3 d-flex align-items-end gap-2">
@@ -90,9 +88,9 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex flex-column">
-                                                <a href="{{ route('admin.logs.index', ['date_from' => $log->created_at->format('Y-m-d'), 'date_to' => $log->created_at->format('Y-m-d')]) }}" 
-                                                   class="fw-medium tx-12 text-light hover-primary" 
-                                                   title="Filter by this date">
+                                                <a href="{{ route('admin.logs.index', ['date_from' => $log->created_at->format('Y-m-d'), 'date_to' => $log->created_at->format('Y-m-d')]) }}"
+                                                    class="fw-medium tx-12 text-primary hover-primary"
+                                                    title="Filter by this date">
                                                     {{ $log->created_at->format('Y-m-d H:i:s') }}
                                                 </a>
                                                 <span
@@ -153,7 +151,7 @@
 
 @section('scripts')
     <script>
-        $(function() {
+        $(function () {
             'use strict';
 
             const flatpickrConfig = {
@@ -166,7 +164,7 @@
             if ($('#date_from_wrap').length) {
                 flatpickr("#date_from_wrap", flatpickrConfig);
             }
-            
+
             if ($('#date_to_wrap').length) {
                 flatpickr("#date_to_wrap", flatpickrConfig);
             }

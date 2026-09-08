@@ -17,8 +17,7 @@
                             <img id="profile-avatar-preview" class="wd-70 rounded-circle border border-primary border-4"
                                 src="{{ $user->avatar ? asset('storage/' . $user->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=4B49AC&color=fff&size=100' }}"
                                 alt="profile">
-                            <span
-                                class="h4 ms-3 fw-bolder tx-20">{{ $user->full_name ?? $user->name }}</span>
+                            <span class="h4 ms-3 fw-bolder tx-20">{{ $user->full_name ?? $user->name }}</span>
                         </div>
                         <div class="d-none d-md-block">
                             <input type="file" id="avatar-input" class="d-none" accept="image/*">
@@ -153,8 +152,10 @@
                                         <div class="mb-3">
                                             <label class="form-label">Current Password</label>
                                             <div class="input-group">
-                                                <input type="password" name="current_password" id="current_password" class="form-control">
-                                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('current_password')">
+                                                <input type="password" name="current_password" id="current_password"
+                                                    class="form-control">
+                                                <button class="btn btn-outline-secondary" type="button"
+                                                    onclick="togglePassword('current_password')">
                                                     <i data-lucide="eye" class="icon-sm"></i>
                                                 </button>
                                             </div>
@@ -164,14 +165,17 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">New Password</label>
                                                 <div class="input-group">
-                                                    <input type="password" name="password" id="new_password" class="form-control" onkeyup="checkPasswordStrength()">
-                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_password')">
+                                                    <input type="password" name="password" id="new_password"
+                                                        class="form-control" onkeyup="checkPasswordStrength()">
+                                                    <button class="btn btn-outline-secondary" type="button"
+                                                        onclick="togglePassword('new_password')">
                                                         <i data-lucide="eye" class="icon-sm"></i>
                                                     </button>
                                                 </div>
                                                 <div class="mt-2">
                                                     <div class="progress mb-1" style="height: 5px;">
-                                                        <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                                        <div id="password-strength-bar" class="progress-bar"
+                                                            role="progressbar" style="width: 0%"></div>
                                                     </div>
                                                     <div class="tx-11 fw-bold text-uppercase">
                                                         STRENGTH: <span id="password-strength">-</span>
@@ -182,21 +186,24 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Confirm New Password</label>
                                                 <div class="input-group">
-                                                    <input type="password" name="password_confirmation" id="new_password_confirmation" class="form-control">
-                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_password_confirmation')">
+                                                    <input type="password" name="password_confirmation"
+                                                        id="new_password_confirmation" class="form-control">
+                                                    <button class="btn btn-outline-secondary" type="button"
+                                                        onclick="togglePassword('new_password_confirmation')">
                                                         <i data-lucide="eye" class="icon-sm"></i>
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="mb-3 p-3 bg-dark rounded border">
-                                            <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">Password Requirements:</label>
+                                            <label class="tx-11 fw-bolder mb-2 text-uppercase text-muted d-block">Password
+                                                Requirements:</label>
                                             <ul class="tx-12 text-muted mb-0 ps-3">
-                                                <li id="req-length">• Minimum 8 characters</li>
-                                                <li id="req-upper">• At least 1 uppercase letter</li>
-                                                <li id="req-lower">• At least 1 lowercase letter</li>
-                                                <li id="req-number">• At least 1 number</li>
-                                                <li id="req-symbol">• At least 1 special character</li>
+                                                <li id="req-length">Minimum 8 characters</li>
+                                                <li id="req-upper">At least 1 uppercase letter</li>
+                                                <li id="req-lower">At least 1 lowercase letter</li>
+                                                <li id="req-number">At least 1 number</li>
+                                                <li id="req-symbol">At least 1 special character</li>
                                             </ul>
                                         </div>
                                         <div class="text-end">
@@ -245,13 +252,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Global Utility Functions for Security Layer
-        (function() {
-            window.togglePassword = function(fieldId) {
+        (function () {
+            window.togglePassword = function (fieldId) {
                 const field = document.getElementById(fieldId);
                 if (!field) return;
-                
+
                 field.type = field.type === "password" ? "text" : "password";
-                
+
                 // Update Icon
                 const btn = field.parentElement.querySelector('button');
                 const icon = btn ? btn.querySelector('i') : null;
@@ -261,13 +268,13 @@
                 }
             };
 
-            window.checkPasswordStrength = function() {
+            window.checkPasswordStrength = function () {
                 const passwordInput = document.getElementById("new_password");
                 const strengthLabel = document.getElementById("password-strength");
                 const bar = document.getElementById("password-strength-bar");
-                
+
                 if (!passwordInput || !strengthLabel) return;
-                
+
                 const password = passwordInput.value;
                 if (!password) {
                     strengthLabel.innerText = "-";
@@ -288,7 +295,7 @@
                 let strength = "Weak";
                 let barClass = 'progress-bar bg-danger';
                 let barWidth = Math.max(5, (score * 20)) + '%';
-                
+
                 if (score >= 4) {
                     strength = "Strong";
                     barClass = 'progress-bar bg-success';
@@ -380,21 +387,21 @@
                 const form = $(this);
                 const btn = form.find('button[type="submit"]');
                 const isSecurity = form.attr('id') === 'security-form';
-                
+
                 // Clear errors
                 form.find('.text-danger').text('');
-                
+
                 btn.prop('disabled', true).text('Synchronizing...');
                 $.ajax({
                     url: "{{ route('admin.profile.update') }}",
                     method: "POST", data: form.serialize(),
                     success: function (response) {
                         if (response.redirect) {
-                            Swal.fire({ 
-                                icon: 'success', 
-                                title: 'Security Updated', 
-                                text: response.message, 
-                                showConfirmButton: true 
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Security Updated',
+                                text: response.message,
+                                showConfirmButton: true
                             }).then(() => {
                                 window.location.href = response.redirect;
                             });
@@ -407,7 +414,7 @@
                         let errorMsg = 'Failure.';
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
                             // Map errors to specific fields if they exist
-                            $.each(xhr.responseJSON.errors, function(field, messages) {
+                            $.each(xhr.responseJSON.errors, function (field, messages) {
                                 $(`.error-${field}`).text(messages[0]);
                             });
                             errorMsg = Object.values(xhr.responseJSON.errors).flat().join('<br>');
@@ -416,8 +423,8 @@
                         }
                         Swal.fire({ icon: 'error', title: 'Error', html: errorMsg });
                     },
-                    complete: function () { 
-                        btn.prop('disabled', false).text(isSecurity ? 'Update Password' : 'Update Profile'); 
+                    complete: function () {
+                        btn.prop('disabled', false).text(isSecurity ? 'Update Password' : 'Update Profile');
                     }
                 });
             });
